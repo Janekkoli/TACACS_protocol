@@ -3,4 +3,8 @@
  ; (theories protocol)
  (package tacacs))
 
+(library
+ (name tacacs_extracted)
+ (modules tacacs_extracted))
+
 (include_subdirs qualified)

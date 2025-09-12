@@ -1,7 +1,14 @@
 (* Simple TCP client *)
 open Unix
+open Tacacs_extracted
+
+let rec nat_to_int = function
+  | O -> 0
+  | S n -> 1 + nat_to_int n
 
 let () =
+  let result = Tacacs_extracted.fact (S (S (S (S (S O))))) in
+  Printf.printf "5! = %d\n" (nat_to_int result);
   let server_ip = "127.0.0.1" in
   let port = 9000 in
   let sock = socket PF_INET SOCK_STREAM 0 in
