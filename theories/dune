@@ -1,0 +1,6 @@
+(coq.theory
+ (name protocol)
+ ; (theories protocol)
+ (package tacacs))
+
+(include_subdirs qualified)

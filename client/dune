@@ -1,3 +1,5 @@
 (executable
  (name client)
- (libraries unix))
+ (libraries unix zarith)
+ (public_name tacacs-client)
+ (package tacacs))

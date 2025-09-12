@@ -1,1 +1,15 @@
 _build
+
+Makefile*
+.coqdeps.d
+
+.lia.cache
+.*.aux
+*.vo
+*.glob
+
+_build
+minihttpserver.install
+.merlin
+
+_opam
