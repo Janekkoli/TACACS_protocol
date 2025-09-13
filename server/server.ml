@@ -2,7 +2,11 @@
 open Unix
 
 let () =
-  let port = 9000 in
+  let argc = Array.length Sys.argv in
+  if argc < 2 then
+    Printf.printf "Usage: %s <port>\n" Sys.argv.(0)
+  else
+    let port = int_of_string Sys.argv.(1) in
   let sockaddr = ADDR_INET (inet_addr_any, port) in
   let sock = socket PF_INET SOCK_STREAM 0 in
   bind sock sockaddr;
