@@ -3,131 +3,292 @@ type nat =
 | O
 | S of nat
 
+(** val app : 'a1 list -> 'a1 list -> 'a1 list **)
 
+let rec app l m =
+  match l with
+  | [] -> m
+  | a :: l1 -> a :: (app l1 m)
 
-type uint =
-| Nil
-| D0 of uint
-| D1 of uint
-| D2 of uint
-| D3 of uint
-| D4 of uint
-| D5 of uint
-| D6 of uint
-| D7 of uint
-| D8 of uint
-| D9 of uint
+type byte = nat
 
-(** val revapp : uint -> uint -> uint **)
+(** val crlf : byte list **)
 
-let rec revapp d d' =
-  match d with
-  | Nil -> d'
-  | D0 d0 -> revapp d0 (D0 d')
-  | D1 d0 -> revapp d0 (D1 d')
-  | D2 d0 -> revapp d0 (D2 d')
-  | D3 d0 -> revapp d0 (D3 d')
-  | D4 d0 -> revapp d0 (D4 d')
-  | D5 d0 -> revapp d0 (D5 d')
-  | D6 d0 -> revapp d0 (D6 d')
-  | D7 d0 -> revapp d0 (D7 d')
-  | D8 d0 -> revapp d0 (D8 d')
-  | D9 d0 -> revapp d0 (D9 d')
+let crlf =
+  (S (S (S (S (S (S (S (S (S (S (S (S (S O))))))))))))) :: ((S (S (S (S (S (S
+    (S (S (S (S O)))))))))) :: [])
 
-(** val rev : uint -> uint **)
+(** val space : byte list **)
 
-let rev d =
-  revapp d Nil
+let space =
+  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S O)))))))))))))))))))))))))))))))) :: []
 
-module Little =
+module Auth =
  struct
-  (** val succ : uint -> uint **)
+  type t = { username : char list; password : char list; line : nat;
+             style : char list }
 
-  let rec succ = function
-  | Nil -> D1 Nil
-  | D0 d0 -> D1 d0
-  | D1 d0 -> D2 d0
-  | D2 d0 -> D3 d0
-  | D3 d0 -> D4 d0
-  | D4 d0 -> D5 d0
-  | D5 d0 -> D6 d0
-  | D6 d0 -> D7 d0
-  | D7 d0 -> D8 d0
-  | D8 d0 -> D9 d0
-  | D9 d0 -> D0 (succ d0)
+  (** val username : t -> char list **)
+
+  let username t0 =
+    t0.username
+
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
+
+  (** val style : t -> char list **)
+
+  let style t0 =
+    t0.style
  end
 
-(** val add : nat -> nat -> nat **)
-
-let rec add n m =
-  match n with
-  | O -> m
-  | S p -> S (add p m)
-
-(** val mul : nat -> nat -> nat **)
-
-let rec mul n m =
-  match n with
-  | O -> O
-  | S p -> add m (mul p m)
-
-module Nat =
+module Login =
  struct
-  (** val to_little_uint : nat -> uint -> uint **)
+  type t = { username : char list; password : char list; line : nat }
 
-  let rec to_little_uint n acc =
-    match n with
-    | O -> acc
-    | S n0 -> to_little_uint n0 (Little.succ acc)
+  (** val username : t -> char list **)
 
-  (** val to_uint : nat -> uint **)
+  let username t0 =
+    t0.username
 
-  let to_uint n =
-    rev (to_little_uint n (D0 Nil))
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
  end
 
-(** val append : char list -> char list -> char list **)
-
-let rec append s1 s2 =
-  match s1 with
-  | [] -> s2
-  | c::s1' -> c::(append s1' s2)
-
-module NilEmpty =
+module Connect =
  struct
-  (** val string_of_uint : uint -> char list **)
+  type t = { username : char list; password : char list; line : nat;
+             destination_ip : char list; destination_port : nat }
 
-  let rec string_of_uint = function
-  | Nil -> []
-  | D0 d0 -> '0'::(string_of_uint d0)
-  | D1 d0 -> '1'::(string_of_uint d0)
-  | D2 d0 -> '2'::(string_of_uint d0)
-  | D3 d0 -> '3'::(string_of_uint d0)
-  | D4 d0 -> '4'::(string_of_uint d0)
-  | D5 d0 -> '5'::(string_of_uint d0)
-  | D6 d0 -> '6'::(string_of_uint d0)
-  | D7 d0 -> '7'::(string_of_uint d0)
-  | D8 d0 -> '8'::(string_of_uint d0)
-  | D9 d0 -> '9'::(string_of_uint d0)
+  (** val username : t -> char list **)
+
+  let username t0 =
+    t0.username
+
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
+
+  (** val destination_ip : t -> char list **)
+
+  let destination_ip t0 =
+    t0.destination_ip
+
+  (** val destination_port : t -> nat **)
+
+  let destination_port t0 =
+    t0.destination_port
  end
 
-(** val string_of_nat : nat -> char list **)
+module Superuser =
+ struct
+  type t = { username : char list; password : char list; line : nat }
 
-let string_of_nat n =
-  NilEmpty.string_of_uint (Nat.to_uint n)
+  (** val username : t -> char list **)
 
-(** val fact : nat -> nat **)
+  let username t0 =
+    t0.username
 
-let rec fact n = match n with
-| O -> S O
-| S n' -> mul n (fact n')
+  (** val password : t -> char list **)
 
-type auth_request = { version : nat; req_type : char list;
-                      username : char list; password : char list; line : 
-                      nat }
+  let password t0 =
+    t0.password
 
-(** val make_package : auth_request -> char list list **)
+  (** val line : t -> nat **)
 
-let make_package req =
-  (append (string_of_nat req.version) (append (' '::[]) req.req_type)) :: (req.username :: (req.password :: (
-    (string_of_nat req.line) :: [])))
+  let line t0 =
+    t0.line
+ end
+
+module Logout =
+ struct
+  type t = { username : char list; password : char list; line : nat;
+             reason : char list }
+
+  (** val username : t -> char list **)
+
+  let username t0 =
+    t0.username
+
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
+
+  (** val reason : t -> char list **)
+
+  let reason t0 =
+    t0.reason
+ end
+
+module Slipon =
+ struct
+  type t = { username : char list; password : char list; line : nat;
+             slip_address : char list }
+
+  (** val username : t -> char list **)
+
+  let username t0 =
+    t0.username
+
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
+
+  (** val slip_address : t -> char list **)
+
+  let slip_address t0 =
+    t0.slip_address
+ end
+
+module Slipoff =
+ struct
+  type t = { username : char list; password : char list; line : nat;
+             reason : char list }
+
+  (** val username : t -> char list **)
+
+  let username t0 =
+    t0.username
+
+  (** val password : t -> char list **)
+
+  let password t0 =
+    t0.password
+
+  (** val line : t -> nat **)
+
+  let line t0 =
+    t0.line
+
+  (** val reason : t -> char list **)
+
+  let reason t0 =
+    t0.reason
+ end
+
+type request =
+| Auth of Auth.t
+| Login of Login.t
+| Connect of Connect.t
+| Superuser of Superuser.t
+| Logout of Logout.t
+| Slipon of Slipon.t
+| Slipoff of Slipoff.t
+
+type 'a serializable =
+  'a -> byte list
+  (* singleton inductive, whose constructor was Build_Serializable *)
+
+(** val nat_serializable : nat serializable **)
+
+let nat_serializable _ =
+  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    O))))))))))))))))))))))))))))))))))))))))))))) :: ((S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S O)))))))))))))))))))))))))))))))))))))))))))))))))))))))) :: [])
+
+(** val string_serializable : char list serializable **)
+
+let string_serializable _ =
+  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S
+    O)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) :: ((S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+    (S (S (S (S (S
+    O)))))))))))))))))))))))))))))))))))))))))))))))))))))) :: [])
+
+(** val encode_fields : byte list list -> byte list **)
+
+let rec encode_fields = function
+| [] -> []
+| x :: xs ->
+  (match xs with
+   | [] -> x
+   | _ :: _ -> app x (app space (encode_fields xs)))
+
+(** val encode_variant : byte -> byte list list -> byte list **)
+
+let encode_variant tag fields =
+  app (tag :: []) (app (encode_fields fields) crlf)
+
+(** val encode_request_auto : request -> byte list **)
+
+let encode_request_auto = function
+| Auth a ->
+  encode_variant O
+    ((string_serializable a.Auth.username) :: ((string_serializable
+                                                 a.Auth.password) :: (
+    (nat_serializable a.Auth.line) :: ((string_serializable a.Auth.style) :: []))))
+| Login l ->
+  encode_variant (S O)
+    ((string_serializable l.Login.username) :: ((string_serializable
+                                                  l.Login.password) :: (
+    (nat_serializable l.Login.line) :: [])))
+| Connect c ->
+  encode_variant (S (S O))
+    ((string_serializable c.Connect.username) :: ((string_serializable
+                                                    c.Connect.password) :: (
+    (nat_serializable c.Connect.line) :: ((string_serializable
+                                            c.Connect.destination_ip) :: (
+    (nat_serializable c.Connect.destination_port) :: [])))))
+| Superuser s ->
+  encode_variant (S (S (S O)))
+    ((string_serializable s.Superuser.username) :: ((string_serializable
+                                                      s.Superuser.password) :: (
+    (nat_serializable s.Superuser.line) :: [])))
+| Logout lo ->
+  encode_variant (S (S (S (S O))))
+    ((string_serializable lo.Logout.username) :: ((string_serializable
+                                                    lo.Logout.password) :: (
+    (nat_serializable lo.Logout.line) :: ((string_serializable
+                                            lo.Logout.reason) :: []))))
+| Slipon so ->
+  encode_variant (S (S (S (S (S O)))))
+    ((string_serializable so.Slipon.username) :: ((string_serializable
+                                                    so.Slipon.password) :: (
+    (nat_serializable so.Slipon.line) :: ((string_serializable
+                                            so.Slipon.slip_address) :: []))))
+| Slipoff sf ->
+  encode_variant (S (S (S (S (S (S O))))))
+    ((string_serializable sf.Slipoff.username) :: ((string_serializable
+                                                     sf.Slipoff.password) :: (
+    (nat_serializable sf.Slipoff.line) :: ((string_serializable
+                                             sf.Slipoff.reason) :: []))))

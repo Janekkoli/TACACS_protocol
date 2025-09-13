@@ -3,54 +3,127 @@ type nat =
 | O
 | S of nat
 
+val app : 'a1 list -> 'a1 list -> 'a1 list
 
+type byte = nat
 
-type uint =
-| Nil
-| D0 of uint
-| D1 of uint
-| D2 of uint
-| D3 of uint
-| D4 of uint
-| D5 of uint
-| D6 of uint
-| D7 of uint
-| D8 of uint
-| D9 of uint
+val crlf : byte list
 
-val revapp : uint -> uint -> uint
+val space : byte list
 
-val rev : uint -> uint
-
-module Little :
+module Auth :
  sig
-  val succ : uint -> uint
+  type t = { username : char list; password : char list; line : nat;
+             style : char list }
+
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
+
+  val style : t -> char list
  end
 
-val add : nat -> nat -> nat
-
-val mul : nat -> nat -> nat
-
-module Nat :
+module Login :
  sig
-  val to_little_uint : nat -> uint -> uint
+  type t = { username : char list; password : char list; line : nat }
 
-  val to_uint : nat -> uint
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
  end
 
-val append : char list -> char list -> char list
-
-module NilEmpty :
+module Connect :
  sig
-  val string_of_uint : uint -> char list
+  type t = { username : char list; password : char list; line : nat;
+             destination_ip : char list; destination_port : nat }
+
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
+
+  val destination_ip : t -> char list
+
+  val destination_port : t -> nat
  end
 
-val string_of_nat : nat -> char list
+module Superuser :
+ sig
+  type t = { username : char list; password : char list; line : nat }
 
-val fact : nat -> nat
+  val username : t -> char list
 
-type auth_request = { version : nat; req_type : char list;
-                      username : char list; password : char list; line : 
-                      nat }
+  val password : t -> char list
 
-val make_package : auth_request -> char list list
+  val line : t -> nat
+ end
+
+module Logout :
+ sig
+  type t = { username : char list; password : char list; line : nat;
+             reason : char list }
+
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
+
+  val reason : t -> char list
+ end
+
+module Slipon :
+ sig
+  type t = { username : char list; password : char list; line : nat;
+             slip_address : char list }
+
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
+
+  val slip_address : t -> char list
+ end
+
+module Slipoff :
+ sig
+  type t = { username : char list; password : char list; line : nat;
+             reason : char list }
+
+  val username : t -> char list
+
+  val password : t -> char list
+
+  val line : t -> nat
+
+  val reason : t -> char list
+ end
+
+type request =
+| Auth of Auth.t
+| Login of Login.t
+| Connect of Connect.t
+| Superuser of Superuser.t
+| Logout of Logout.t
+| Slipon of Slipon.t
+| Slipoff of Slipoff.t
+
+type 'a serializable =
+  'a -> byte list
+  (* singleton inductive, whose constructor was Build_Serializable *)
+
+val nat_serializable : nat serializable
+
+val string_serializable : char list serializable
+
+val encode_fields : byte list list -> byte list
+
+val encode_variant : byte -> byte list list -> byte list
+
+val encode_request_auto : request -> byte list

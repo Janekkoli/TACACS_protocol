@@ -10,6 +10,10 @@ let rec int_to_nat n =
   if n <= 0 then O 
   else S (int_to_nat (n - 1))
 
+let rec nat_to_int = function
+  | O -> 0
+  | S n -> 1 + nat_to_int n
+
 let string_to_char_list s =
   let rec aux i acc =
     if i < 0 then acc
@@ -18,7 +22,7 @@ let string_to_char_list s =
   aux (String.length s - 1) []
 
 
-let char_list_to_string chars =
+(* let char_list_to_string chars =
   let bytes = Bytes.create (List.length chars) in
   let rec aux i = function
     | [] -> Bytes.to_string bytes
@@ -26,7 +30,7 @@ let char_list_to_string chars =
         Bytes.set bytes i c;
         aux (i + 1) rest
   in
-aux 0 chars
+aux 0 chars *)
 
 let () =
   let argc = Array.length Sys.argv in
@@ -45,20 +49,28 @@ let () =
   Printf.printf "Connected to %s:%d\n%!" server_ip port;
 
 
-  let sample_request = {
+  (* let sample_request = {
     version = int_to_nat 1;           (* TACACS+ version 1 *)
     req_type = string_to_char_list "authenticate";        (* request type *)
     username = string_to_char_list "alice";               (* username *)
     password = string_to_char_list "secret123";           (* password *)
     line = int_to_nat 1;             (* line number *)
   } in
-  
+   *)
 
-  let package_list = make_package sample_request in
-  let string_list = List.map char_list_to_string package_list in
+  let auth_data = {
+    Auth.username = string_to_char_list "alice";
+    Auth.password = string_to_char_list "secret123";
+    Auth.line = int_to_nat 1;
+    Auth.style = string_to_char_list "ascii";
+  } in
+
+  let package = encode_request_auto (Auth auth_data) in
+  (* let string = List.map char_list_to_string package_list in *)
   
-  Printf.printf "Package contents:\n";
-  List.iteri (fun i s -> Printf.printf "  Field %d: %s\n" i s) string_list;
+  Printf.printf "Package bytes: [";
+  List.iter (fun n -> Printf.printf "%d; " (nat_to_int n)) package;
+  Printf.printf "]\n";
 
   let msg = "xdddddd" in
 
