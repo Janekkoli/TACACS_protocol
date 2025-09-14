@@ -1,5 +1,3 @@
-(* factorial.v *)
-
 (* Core imports *)
 From Coq Require Import String Ascii List Arith NArith.
 Import ListNotations.
@@ -143,11 +141,3 @@ Definition encode_request (r : request) : string :=
       Slipoff.password sf ++ CRLF ++
       string_of_nat (Slipoff.line sf) ++ CRLF
   end.
-
-
-(* Extraction stuff *)
-(* Require Extraction.
-
-Set Extraction Output Directory "../../theories".
-Extraction Language OCaml.
-Extraction "tacacs_extracted.ml" request encode_request_auto.  *)
