@@ -1,32 +1,183 @@
 
-type nat =
-| O
-| S of nat
+type uint =
+| Nil
+| D0 of uint
+| D1 of uint
+| D2 of uint
+| D3 of uint
+| D4 of uint
+| D5 of uint
+| D6 of uint
+| D7 of uint
+| D8 of uint
+| D9 of uint
 
-(** val app : 'a1 list -> 'a1 list -> 'a1 list **)
+(** val revapp : uint -> uint -> uint **)
 
-let rec app l m =
-  match l with
-  | [] -> m
-  | a :: l1 -> a :: (app l1 m)
+let rec revapp d d' =
+  match d with
+  | Nil -> d'
+  | D0 d0 -> revapp d0 (D0 d')
+  | D1 d0 -> revapp d0 (D1 d')
+  | D2 d0 -> revapp d0 (D2 d')
+  | D3 d0 -> revapp d0 (D3 d')
+  | D4 d0 -> revapp d0 (D4 d')
+  | D5 d0 -> revapp d0 (D5 d')
+  | D6 d0 -> revapp d0 (D6 d')
+  | D7 d0 -> revapp d0 (D7 d')
+  | D8 d0 -> revapp d0 (D8 d')
+  | D9 d0 -> revapp d0 (D9 d')
 
-type byte = nat
+(** val rev : uint -> uint **)
 
-(** val crlf : byte list **)
+let rev d =
+  revapp d Nil
 
-let crlf =
-  (S (S (S (S (S (S (S (S (S (S (S (S (S O))))))))))))) :: ((S (S (S (S (S (S
-    (S (S (S (S O)))))))))) :: [])
+module Little =
+ struct
+  (** val succ : uint -> uint **)
 
-(** val space : byte list **)
+  let rec succ = function
+  | Nil -> D1 Nil
+  | D0 d0 -> D1 d0
+  | D1 d0 -> D2 d0
+  | D2 d0 -> D3 d0
+  | D3 d0 -> D4 d0
+  | D4 d0 -> D5 d0
+  | D5 d0 -> D6 d0
+  | D6 d0 -> D7 d0
+  | D7 d0 -> D8 d0
+  | D8 d0 -> D9 d0
+  | D9 d0 -> D0 (succ d0)
+ end
 
-let space =
-  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S O)))))))))))))))))))))))))))))))) :: []
+module Nat =
+ struct
+  (** val to_little_uint : int -> uint -> uint **)
+
+  let rec to_little_uint n0 acc =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> acc)
+      (fun n1 -> to_little_uint n1 (Little.succ acc))
+      n0
+
+  (** val to_uint : int -> uint **)
+
+  let to_uint n0 =
+    rev (to_little_uint n0 (D0 Nil))
+ end
+
+type positive =
+| XI of positive
+| XO of positive
+| XH
+
+type n =
+| N0
+| Npos of positive
+
+module Pos =
+ struct
+  (** val succ : positive -> positive **)
+
+  let rec succ = function
+  | XI p -> XO (succ p)
+  | XO p -> XI p
+  | XH -> XO XH
+
+  (** val of_succ_nat : int -> positive **)
+
+  let rec of_succ_nat n0 =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> XH)
+      (fun x -> succ (of_succ_nat x))
+      n0
+ end
+
+module N =
+ struct
+  (** val of_nat : int -> n **)
+
+  let of_nat n0 =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> N0)
+      (fun n' -> Npos (Pos.of_succ_nat n'))
+      n0
+ end
+
+(** val zero : char **)
+
+let zero = '\000'
+
+(** val one : char **)
+
+let one = '\001'
+
+(** val shift : bool -> char -> char **)
+
+let shift = fun b c -> Char.chr (((Char.code c) lsl 1) land 255 + if b then 1 else 0)
+
+(** val ascii_of_pos : positive -> char **)
+
+let ascii_of_pos =
+  let rec loop n0 p =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> zero)
+      (fun n' ->
+      match p with
+      | XI p' -> shift true (loop n' p')
+      | XO p' -> shift false (loop n' p')
+      | XH -> one)
+      n0
+  in loop (succ (succ (succ (succ (succ (succ (succ (succ 0))))))))
+
+(** val ascii_of_N : n -> char **)
+
+let ascii_of_N = function
+| N0 -> zero
+| Npos p -> ascii_of_pos p
+
+(** val ascii_of_nat : int -> char **)
+
+let ascii_of_nat a =
+  ascii_of_N (N.of_nat a)
+
+(** val append : char list -> char list -> char list **)
+
+let rec append s1 s2 =
+  match s1 with
+  | [] -> s2
+  | c::s1' -> c::(append s1' s2)
+
+module NilEmpty =
+ struct
+  (** val string_of_uint : uint -> char list **)
+
+  let rec string_of_uint = function
+  | Nil -> []
+  | D0 d0 -> '0'::(string_of_uint d0)
+  | D1 d0 -> '1'::(string_of_uint d0)
+  | D2 d0 -> '2'::(string_of_uint d0)
+  | D3 d0 -> '3'::(string_of_uint d0)
+  | D4 d0 -> '4'::(string_of_uint d0)
+  | D5 d0 -> '5'::(string_of_uint d0)
+  | D6 d0 -> '6'::(string_of_uint d0)
+  | D7 d0 -> '7'::(string_of_uint d0)
+  | D8 d0 -> '8'::(string_of_uint d0)
+  | D9 d0 -> '9'::(string_of_uint d0)
+ end
+
+(** val cRLF : char list **)
+
+let cRLF =
+  (ascii_of_nat (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ
+    (succ (succ (succ 0))))))))))))))::((ascii_of_nat (succ (succ (succ (succ
+                                          (succ (succ (succ (succ (succ (succ
+                                          0)))))))))))::[])
 
 module Auth =
  struct
-  type t = { username : char list; password : char list; line : nat;
+  type t = { username : char list; password : char list; line : int;
              style : char list }
 
   (** val username : t -> char list **)
@@ -39,7 +190,7 @@ module Auth =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -52,7 +203,7 @@ module Auth =
 
 module Login =
  struct
-  type t = { username : char list; password : char list; line : nat }
+  type t = { username : char list; password : char list; line : int }
 
   (** val username : t -> char list **)
 
@@ -64,7 +215,7 @@ module Login =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -72,8 +223,8 @@ module Login =
 
 module Connect =
  struct
-  type t = { username : char list; password : char list; line : nat;
-             destination_ip : char list; destination_port : nat }
+  type t = { username : char list; password : char list; line : int;
+             destination_ip : char list; destination_port : int }
 
   (** val username : t -> char list **)
 
@@ -85,7 +236,7 @@ module Connect =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -95,7 +246,7 @@ module Connect =
   let destination_ip t0 =
     t0.destination_ip
 
-  (** val destination_port : t -> nat **)
+  (** val destination_port : t -> int **)
 
   let destination_port t0 =
     t0.destination_port
@@ -103,7 +254,7 @@ module Connect =
 
 module Superuser =
  struct
-  type t = { username : char list; password : char list; line : nat }
+  type t = { username : char list; password : char list; line : int }
 
   (** val username : t -> char list **)
 
@@ -115,7 +266,7 @@ module Superuser =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -123,7 +274,7 @@ module Superuser =
 
 module Logout =
  struct
-  type t = { username : char list; password : char list; line : nat;
+  type t = { username : char list; password : char list; line : int;
              reason : char list }
 
   (** val username : t -> char list **)
@@ -136,7 +287,7 @@ module Logout =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -149,7 +300,7 @@ module Logout =
 
 module Slipon =
  struct
-  type t = { username : char list; password : char list; line : nat;
+  type t = { username : char list; password : char list; line : int;
              slip_address : char list }
 
   (** val username : t -> char list **)
@@ -162,7 +313,7 @@ module Slipon =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -175,7 +326,7 @@ module Slipon =
 
 module Slipoff =
  struct
-  type t = { username : char list; password : char list; line : nat;
+  type t = { username : char list; password : char list; line : int;
              reason : char list }
 
   (** val username : t -> char list **)
@@ -188,7 +339,7 @@ module Slipoff =
   let password t0 =
     t0.password
 
-  (** val line : t -> nat **)
+  (** val line : t -> int **)
 
   let line t0 =
     t0.line
@@ -208,87 +359,70 @@ type request =
 | Slipon of Slipon.t
 | Slipoff of Slipoff.t
 
-type 'a serializable =
-  'a -> byte list
-  (* singleton inductive, whose constructor was Build_Serializable *)
+(** val string_of_nat : int -> char list **)
 
-(** val nat_serializable : nat serializable **)
+let string_of_nat n0 =
+  NilEmpty.string_of_uint (Nat.to_uint n0)
 
-let nat_serializable _ =
-  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    O))))))))))))))))))))))))))))))))))))))))))))) :: ((S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S O)))))))))))))))))))))))))))))))))))))))))))))))))))))))) :: [])
+(** val encode_request : request -> char list **)
 
-(** val string_serializable : char list serializable **)
-
-let string_serializable _ =
-  (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S
-    O)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) :: ((S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
-    (S (S (S (S (S
-    O)))))))))))))))))))))))))))))))))))))))))))))))))))))) :: [])
-
-(** val encode_fields : byte list list -> byte list **)
-
-let rec encode_fields = function
-| [] -> []
-| x :: xs ->
-  (match xs with
-   | [] -> x
-   | _ :: _ -> app x (app space (encode_fields xs)))
-
-(** val encode_variant : byte -> byte list list -> byte list **)
-
-let encode_variant tag fields =
-  app (tag :: []) (app (encode_fields fields) crlf)
-
-(** val encode_request_auto : request -> byte list **)
-
-let encode_request_auto = function
+let encode_request = function
 | Auth a ->
-  encode_variant O
-    ((string_serializable a.Auth.username) :: ((string_serializable
-                                                 a.Auth.password) :: (
-    (nat_serializable a.Auth.line) :: ((string_serializable a.Auth.style) :: []))))
+  append ('1'::(' '::('A'::('U'::('T'::('H'::(' '::[])))))))
+    (append a.Auth.style
+      (append cRLF
+        (append a.Auth.username
+          (append cRLF
+            (append a.Auth.password
+              (append cRLF (append (string_of_nat a.Auth.line) cRLF)))))))
 | Login l ->
-  encode_variant (S O)
-    ((string_serializable l.Login.username) :: ((string_serializable
-                                                  l.Login.password) :: (
-    (nat_serializable l.Login.line) :: [])))
+  append ('1'::(' '::('L'::('O'::('G'::('I'::('N'::[])))))))
+    (append cRLF
+      (append l.Login.username
+        (append cRLF
+          (append l.Login.password
+            (append cRLF (append (string_of_nat l.Login.line) cRLF))))))
 | Connect c ->
-  encode_variant (S (S O))
-    ((string_serializable c.Connect.username) :: ((string_serializable
-                                                    c.Connect.password) :: (
-    (nat_serializable c.Connect.line) :: ((string_serializable
-                                            c.Connect.destination_ip) :: (
-    (nat_serializable c.Connect.destination_port) :: [])))))
+  append
+    ('1'::(' '::('C'::('O'::('N'::('N'::('E'::('C'::('T'::(' '::[]))))))))))
+    (append c.Connect.destination_ip
+      (append (' '::[])
+        (append (string_of_nat c.Connect.destination_port)
+          (append cRLF
+            (append c.Connect.username
+              (append cRLF
+                (append c.Connect.password
+                  (append cRLF (append (string_of_nat c.Connect.line) cRLF)))))))))
 | Superuser s ->
-  encode_variant (S (S (S O)))
-    ((string_serializable s.Superuser.username) :: ((string_serializable
-                                                      s.Superuser.password) :: (
-    (nat_serializable s.Superuser.line) :: [])))
+  append
+    ('1'::(' '::('S'::('U'::('P'::('E'::('R'::('U'::('S'::('E'::('R'::[])))))))))))
+    (append cRLF
+      (append s.Superuser.username
+        (append cRLF
+          (append s.Superuser.password
+            (append cRLF (append (string_of_nat s.Superuser.line) cRLF))))))
 | Logout lo ->
-  encode_variant (S (S (S (S O))))
-    ((string_serializable lo.Logout.username) :: ((string_serializable
-                                                    lo.Logout.password) :: (
-    (nat_serializable lo.Logout.line) :: ((string_serializable
-                                            lo.Logout.reason) :: []))))
+  append ('1'::(' '::('L'::('O'::('G'::('O'::('U'::('T'::(' '::[])))))))))
+    (append lo.Logout.reason
+      (append cRLF
+        (append lo.Logout.username
+          (append cRLF
+            (append lo.Logout.password
+              (append cRLF (append (string_of_nat lo.Logout.line) cRLF)))))))
 | Slipon so ->
-  encode_variant (S (S (S (S (S O)))))
-    ((string_serializable so.Slipon.username) :: ((string_serializable
-                                                    so.Slipon.password) :: (
-    (nat_serializable so.Slipon.line) :: ((string_serializable
-                                            so.Slipon.slip_address) :: []))))
+  append ('1'::(' '::('S'::('L'::('I'::('P'::('O'::('N'::(' '::[])))))))))
+    (append so.Slipon.slip_address
+      (append cRLF
+        (append so.Slipon.username
+          (append cRLF
+            (append so.Slipon.password
+              (append cRLF (append (string_of_nat so.Slipon.line) cRLF)))))))
 | Slipoff sf ->
-  encode_variant (S (S (S (S (S (S O))))))
-    ((string_serializable sf.Slipoff.username) :: ((string_serializable
-                                                     sf.Slipoff.password) :: (
-    (nat_serializable sf.Slipoff.line) :: ((string_serializable
-                                             sf.Slipoff.reason) :: []))))
+  append
+    ('1'::(' '::('S'::('L'::('I'::('P'::('O'::('F'::('F'::(' '::[]))))))))))
+    (append sf.Slipoff.reason
+      (append cRLF
+        (append sf.Slipoff.username
+          (append cRLF
+            (append sf.Slipoff.password
+              (append cRLF (append (string_of_nat sf.Slipoff.line) cRLF)))))))

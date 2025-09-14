@@ -1,18 +1,13 @@
-(* Simple TCP client *)
 open Unix
 open Tacacs_extracted
 
 (* let rec nat_to_int = function
   | O -> 0
-  | S n -> 1 + nat_to_int n *)
+  | S n -> 1 + nat_to_int n
 
 let rec int_to_nat n = 
   if n <= 0 then O 
-  else S (int_to_nat (n - 1))
-
-let rec nat_to_int = function
-  | O -> 0
-  | S n -> 1 + nat_to_int n
+  else S (int_to_nat (n - 1)) *)
 
 let string_to_char_list s =
   let rec aux i acc =
@@ -48,29 +43,17 @@ let () =
   connect sock (ADDR_INET (inet_addr_of_string server_ip, port));
   Printf.printf "Connected to %s:%d\n%!" server_ip port;
 
-
-  (* let sample_request = {
-    version = int_to_nat 1;           (* TACACS+ version 1 *)
-    req_type = string_to_char_list "authenticate";        (* request type *)
-    username = string_to_char_list "alice";               (* username *)
-    password = string_to_char_list "secret123";           (* password *)
-    line = int_to_nat 1;             (* line number *)
-  } in
-   *)
-
   let auth_data = {
     Auth.username = string_to_char_list "alice";
     Auth.password = string_to_char_list "secret123";
-    Auth.line = int_to_nat 1;
+    Auth.line =  12368;
     Auth.style = string_to_char_list "ascii";
   } in
 
-  let package = encode_request_auto (Auth auth_data) in
+  let package = encode_request(Auth auth_data) in
   (* let string = List.map char_list_to_string package_list in *)
+  Printf.printf "Encoded package: %s\n%!" (String.concat "" (List.map (String.make 1) package));
   
-  Printf.printf "Package bytes: [";
-  List.iter (fun n -> Printf.printf "%d; " (nat_to_int n)) package;
-  Printf.printf "]\n";
 
   let msg = "xdddddd" in
 
