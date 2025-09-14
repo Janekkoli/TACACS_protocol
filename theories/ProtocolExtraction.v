@@ -1,6 +1,8 @@
 Require Export Protocol.
-(* Require Export Networking. *)
 Require Extraction.
+
+(* So string is string *)
+Require Import ExtrOcamlBasic ExtrOcamlNatInt ExtrOcamlString.
 
 (* So no int is not nat *)
 Extract Inductive nat => "int" [ "0" "succ" ].

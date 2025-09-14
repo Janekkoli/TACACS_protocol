@@ -9,6 +9,10 @@ Require Import ExtrOcamlBasic ExtrOcamlNatInt ExtrOcamlString.
 Open Scope string_scope.
 Open Scope nat_scope.
 
+Require Import Coq.Numbers.DecimalString.
+
+
+
 Definition CRLF : string :=
   String (Ascii.ascii_of_nat 13)
     (String (Ascii.ascii_of_nat 10) EmptyString).
@@ -89,9 +93,7 @@ Inductive request :=
 
 
 
-(* byte to request *)
-
-Require Import Coq.Numbers.DecimalString.
+(* request to string *)
 
 Definition string_of_nat (n : nat) : string :=
   NilEmpty.string_of_uint (Nat.to_uint n).
@@ -141,3 +143,9 @@ Definition encode_request (r : request) : string :=
       Slipoff.password sf ++ CRLF ++
       string_of_nat (Slipoff.line sf) ++ CRLF
   end.
+
+
+
+
+
+(* Parsing string to request *)
