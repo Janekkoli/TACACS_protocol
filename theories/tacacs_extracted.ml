@@ -493,3 +493,54 @@ let splitincRlF =
     match recarg with
     | [] -> []
     | _::_ -> let (f, r) = tillFirstcRlF recarg in f :: (splitincRlF' r))
+
+(** val tillFirstSP : char list -> char list * char list **)
+
+let rec tillFirstSP = function
+| [] -> ([], [])
+| c::rest ->
+  (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+    (fun b b0 b1 b2 b3 b4 b5 b6 ->
+    if b
+    then let (f, r) = tillFirstSP rest in ((c::f), r)
+    else if b0
+         then let (f, r) = tillFirstSP rest in ((c::f), r)
+         else if b1
+              then let (f, r) = tillFirstSP rest in ((c::f), r)
+              else if b2
+                   then let (f, r) = tillFirstSP rest in ((c::f), r)
+                   else if b3
+                        then let (f, r) = tillFirstSP rest in ((c::f), r)
+                        else if b4
+                             then if b5
+                                  then let (f, r) = tillFirstSP rest in
+                                       ((c::f), r)
+                                  else if b6
+                                       then let (f, r) = tillFirstSP rest in
+                                            ((c::f), r)
+                                       else ([], rest)
+                             else let (f, r) = tillFirstSP rest in ((c::f), r))
+    c
+
+(** val splitinSP : char list -> char list list **)
+
+let splitinSP =
+  fix_sub (fun recarg splitinSP' ->
+    match recarg with
+    | [] -> []
+    | _::_ -> let (f, r) = tillFirstSP recarg in f :: (splitinSP' r))
+
+(** val splitSpacesList : char list list -> char list list list **)
+
+let rec splitSpacesList = function
+| [] -> []
+| f :: r -> (splitinSP f) :: (splitSpacesList r)
+
+(** val splitonCRLFandSpaces : char list -> char list list list **)
+
+let splitonCRLFandSpaces s =
+  let splitedList = splitincRlF s in splitSpacesList splitedList

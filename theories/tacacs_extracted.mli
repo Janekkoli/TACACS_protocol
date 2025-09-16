@@ -158,3 +158,11 @@ val encode_request : request -> char list
 val tillFirstcRlF : char list -> char list * char list
 
 val splitincRlF : char list -> char list list
+
+val tillFirstSP : char list -> char list * char list
+
+val splitinSP : char list -> char list list
+
+val splitSpacesList : char list list -> char list list list
+
+val splitonCRLFandSpaces : char list -> char list list list

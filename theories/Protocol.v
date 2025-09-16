@@ -165,11 +165,11 @@ Fixpoint tillFirstcRlF (s : string): string * string:=
 
 
 (* Takes string and returns list string; parts of s beetween CRLF *)
-Lemma tillFirst_gives_shorter_output :
+(* Lemma tillFirst_gives_shorter_output :
   forall s f r,
     tillFirstcRlF s = (f,r) ->
     length s > length r.
-Proof. admit. Admitted.
+Proof. admit. Admitted. *)
 
 Program Fixpoint splitincRlF (s:string) {measure (length s)} : list string :=
   match s with
@@ -183,3 +183,37 @@ Admitted.
 
 
 
+
+(* Here i split string in spaces *)
+
+(* Function that returns (f,r) - f - first part of s till first CRLF , r - part after CRLF *)
+Fixpoint tillFirstSP (s : string): string * string:=
+  match s with
+  | EmptyString => (EmptyString,EmptyString)
+  | String (Ascii false false false false false true false false) rest => (EmptyString, rest)
+  | String c rest => let (f,r) := tillFirstSP rest in (String c (f), r)
+  end.
+
+
+(* Takes string and returns list string; parts of s beetween CRLF *)
+
+Program Fixpoint splitinSP (s:string) {measure (length s)} : list string :=
+  match s with
+  | EmptyString => []
+  | _ => let (f,r) := tillFirstSP s in f :: splitinSP r
+  end.
+
+Next Obligation.
+  admit.
+Admitted.
+
+
+
+Fixpoint splitSpacesList (s : list string) : list (list string) :=
+  match s with
+  | [] => []
+  | f :: r => splitinSP f :: splitSpacesList r
+  end.
+
+Definition splitonCRLFandSpaces (s:string) : list (list string) :=
+  let splitedList := splitincRlF s in splitSpacesList splitedList.
