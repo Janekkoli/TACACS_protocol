@@ -1,5 +1,5 @@
 (executable
  (name tests)
- (libraries unix zarith tacacs_extracted)
+ (libraries unix zarith functions tacacs_extracted)
  (public_name tacacs-tests)
  (package tacacs))

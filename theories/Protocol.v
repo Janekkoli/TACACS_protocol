@@ -125,8 +125,7 @@ Definition encode_request (r : request) : string :=
       string_of_nat (Login.line l) ++ cRlF
 
   | Connect c =>
-      "1 CONNECT " ++ Connect.destination_ip c ++ " " ++
-      string_of_nat (Connect.destination_port c) ++ cRlF ++
+      "1 CONNECT " ++ Connect.destination_ip c ++ " " ++ string_of_nat (Connect.destination_port c) ++ cRlF ++
       Connect.username c ++ cRlF ++
       Connect.password c ++ cRlF ++
       string_of_nat (Connect.line c) ++ cRlF

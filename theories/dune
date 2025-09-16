@@ -7,4 +7,9 @@
  (name tacacs_extracted)
  (modules tacacs_extracted))
 
+(library
+ (name functions)
+ (modules functions)
+ (libraries tacacs_extracted))
+
 (include_subdirs qualified)
