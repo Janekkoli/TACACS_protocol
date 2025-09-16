@@ -544,3 +544,239 @@ let rec splitSpacesList = function
 
 let splitonCRLFandSpaces s =
   let splitedList = splitincRlF s in splitSpacesList splitedList
+
+(** val parse_request : char list -> char list option **)
+
+let parse_request s =
+  let splitted_s = splitonCRLFandSpaces s in
+  (match splitted_s with
+   | [] -> None
+   | l :: l0 ->
+     (match l with
+      | [] -> None
+      | s0 :: l1 ->
+        (match s0 with
+         | [] -> None
+         | a::s1 ->
+           (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+             (fun b b0 b1 b2 b3 b4 b5 b6 ->
+             if b
+             then if b0
+                  then None
+                  else if b1
+                       then None
+                       else if b2
+                            then None
+                            else if b3
+                                 then if b4
+                                      then if b5
+                                           then None
+                                           else if b6
+                                                then None
+                                                else (match s1 with
+                                                      | [] ->
+                                                        (match l1 with
+                                                         | [] -> None
+                                                         | s2 :: l2 ->
+                                                           (match s2 with
+                                                            | [] -> None
+                                                            | a0::s3 ->
+                                                              (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                                (fun b7 b8 b9 b10 b11 b12 b13 b14 ->
+                                                                if b7
+                                                                then 
+                                                                  if b8
+                                                                  then None
+                                                                  else 
+                                                                    if b9
+                                                                    then None
+                                                                    else 
+                                                                    if b10
+                                                                    then None
+                                                                    else 
+                                                                    if b11
+                                                                    then None
+                                                                    else 
+                                                                    if b12
+                                                                    then None
+                                                                    else 
+                                                                    if b13
+                                                                    then 
+                                                                    if b14
+                                                                    then None
+                                                                    else 
+                                                                    (match s3 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | a1::s4 ->
+                                                                    (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                                    (fun b15 b16 b17 b18 b19 b20 b21 b22 ->
+                                                                    if b15
+                                                                    then 
+                                                                    if b16
+                                                                    then None
+                                                                    else 
+                                                                    if b17
+                                                                    then 
+                                                                    if b18
+                                                                    then None
+                                                                    else 
+                                                                    if b19
+                                                                    then 
+                                                                    if b20
+                                                                    then None
+                                                                    else 
+                                                                    if b21
+                                                                    then 
+                                                                    if b22
+                                                                    then None
+                                                                    else 
+                                                                    (match s4 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | a2::s5 ->
+                                                                    (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                                    (fun b23 b24 b25 b26 b27 b28 b29 b30 ->
+                                                                    if b23
+                                                                    then None
+                                                                    else 
+                                                                    if b24
+                                                                    then None
+                                                                    else 
+                                                                    if b25
+                                                                    then 
+                                                                    if b26
+                                                                    then None
+                                                                    else 
+                                                                    if b27
+                                                                    then 
+                                                                    if b28
+                                                                    then None
+                                                                    else 
+                                                                    if b29
+                                                                    then 
+                                                                    if b30
+                                                                    then None
+                                                                    else 
+                                                                    (match s5 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | a3::s6 ->
+                                                                    (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                                    (fun b31 b32 b33 b34 b35 b36 b37 b38 ->
+                                                                    if b31
+                                                                    then None
+                                                                    else 
+                                                                    if b32
+                                                                    then None
+                                                                    else 
+                                                                    if b33
+                                                                    then None
+                                                                    else 
+                                                                    if b34
+                                                                    then 
+                                                                    if b35
+                                                                    then None
+                                                                    else 
+                                                                    if b36
+                                                                    then None
+                                                                    else 
+                                                                    if b37
+                                                                    then 
+                                                                    if b38
+                                                                    then None
+                                                                    else 
+                                                                    (match s6 with
+                                                                    | [] ->
+                                                                    (match l2 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | _ :: l3 ->
+                                                                    (match l3 with
+                                                                    | [] ->
+                                                                    (match l0 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | l4 :: l5 ->
+                                                                    (match l4 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | _ :: l6 ->
+                                                                    (match l6 with
+                                                                    | [] ->
+                                                                    (match l5 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | l7 :: l8 ->
+                                                                    (match l7 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | _ :: l9 ->
+                                                                    (match l9 with
+                                                                    | [] ->
+                                                                    (match l8 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | l10 :: l11 ->
+                                                                    (match l10 with
+                                                                    | [] ->
+                                                                    None
+                                                                    | _ :: l12 ->
+                                                                    (match l12 with
+                                                                    | [] ->
+                                                                    (match l11 with
+                                                                    | [] ->
+                                                                    Some
+                                                                    ('A'::('U'::('T'::('H'::[]))))
+                                                                    | _ :: _ ->
+                                                                    None)
+                                                                    | _ :: _ ->
+                                                                    None)))
+                                                                    | _ :: _ ->
+                                                                    None)))
+                                                                    | _ :: _ ->
+                                                                    None)))
+                                                                    | _ :: _ ->
+                                                                    None))
+                                                                    | _::_ ->
+                                                                    None)
+                                                                    else None
+                                                                    else None)
+                                                                    a3)
+                                                                    else None
+                                                                    else None
+                                                                    else None)
+                                                                    a2)
+                                                                    else None
+                                                                    else None
+                                                                    else None
+                                                                    else None)
+                                                                    a1)
+                                                                    else None
+                                                                else None)
+                                                                a0))
+                                                      | _::_ -> None)
+                                      else None
+                                 else None
+             else None)
+             a)))

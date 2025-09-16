@@ -155,6 +155,12 @@ Definition encode_request (r : request) : string :=
       string_of_nat (Slipoff.line sf) ++ cRlF
   end.
 
+
+
+
+
+
+
 (* Function that returns (f,r) - f - first part of s till first CRLF , r - part after CRLF *)
 Fixpoint tillFirstcRlF (s : string): string * string:=
   match s with
@@ -165,11 +171,6 @@ Fixpoint tillFirstcRlF (s : string): string * string:=
 
 
 (* Takes string and returns list string; parts of s beetween CRLF *)
-(* Lemma tillFirst_gives_shorter_output :
-  forall s f r,
-    tillFirstcRlF s = (f,r) ->
-    length s > length r.
-Proof. admit. Admitted. *)
 
 Program Fixpoint splitincRlF (s:string) {measure (length s)} : list string :=
   match s with
@@ -180,8 +181,6 @@ Program Fixpoint splitincRlF (s:string) {measure (length s)} : list string :=
 Next Obligation.
   admit.
 Admitted.
-
-
 
 
 (* Here i split string in spaces *)
@@ -207,13 +206,23 @@ Next Obligation.
   admit.
 Admitted.
 
-
-
 Fixpoint splitSpacesList (s : list string) : list (list string) :=
   match s with
   | [] => []
   | f :: r => splitinSP f :: splitSpacesList r
   end.
 
+
 Definition splitonCRLFandSpaces (s:string) : list (list string) :=
   let splitedList := splitincRlF s in splitSpacesList splitedList.
+
+
+
+
+
+Definition parse_request (s : string) : option string :=
+  let splitted_s := splitonCRLFandSpaces s in 
+  match splitted_s with
+  | [["1";"AUTH";ac];[ba];[ca];[da]] => Some "AUTH"
+  | _ => None
+  end.

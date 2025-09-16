@@ -166,3 +166,5 @@ val splitinSP : char list -> char list list
 val splitSpacesList : char list list -> char list list list
 
 val splitonCRLFandSpaces : char list -> char list list list
+
+val parse_request : char list -> char list option
