@@ -8,3 +8,7 @@
 5. Now its for some reason important to have tacacs_extracted.ml file in theories/ and .ml file has to match .mli file or .mli file shouldnt exist
 6. `dune build`
 7. There should be executable files: `./_build/default/server/server.exe` and `./_build/default/client/client.exe`. They are not windows executable just normal linux ones.
+
+# Co stworzyłem
+
+1. Funckcje `let parse_request (s : char list) : request option` i `let encode_request (q : request) : char list`
