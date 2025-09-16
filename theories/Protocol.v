@@ -10,13 +10,24 @@ Open Scope string_scope.
 Open Scope nat_scope.
 
 Require Import Coq.Numbers.DecimalString.
+From Coq Require Import Program.Wf String Ascii.
+Open Scope string_scope.
 
+Require Import Coq.Program.Wf.
+Require Import Coq.Arith.Wf_nat.
+Require Import Coq.Arith.PeanoNat.
+Require Import Coq.micromega.Lia.
+Require Import Coq.Program.Wf.
+Require Import Coq.Arith.Wf_nat.
+(* Definition cR := Ascii.ascii_of_nat 13.
+Definition lF := Ascii.ascii_of_nat 10. *)
 
+Definition cR := Ascii true false true true false false false false.
+Definition lF := Ascii false true false true false false false false.
 
-Definition CRLF : string :=
-  String (Ascii.ascii_of_nat 13)
-    (String (Ascii.ascii_of_nat 10) EmptyString).
-
+Definition cRlF : string :=
+  String (cR)
+    (String (lF) EmptyString).
 
 (* Definitions *)
 Module Auth.
@@ -101,51 +112,74 @@ Definition string_of_nat (n : nat) : string :=
 Definition encode_request (r : request) : string :=
   match r with
   | Auth a =>
-      "1 AUTH " ++ Auth.style a ++ CRLF ++
-      Auth.username a ++ CRLF ++
-      Auth.password a ++ CRLF ++
-      string_of_nat (Auth.line a) ++ CRLF
+      "1 AUTH " ++ Auth.style a ++ cRlF ++
+      Auth.username a ++ cRlF ++
+      Auth.password a ++ cRlF ++
+      string_of_nat (Auth.line a) ++ cRlF
 
   | Login l =>
-      "1 LOGIN" ++ CRLF ++
-      Login.username l ++ CRLF ++
-      Login.password l ++ CRLF ++
-      string_of_nat (Login.line l) ++ CRLF
+      "1 LOGIN" ++ cRlF ++
+      Login.username l ++ cRlF ++
+      Login.password l ++ cRlF ++
+      string_of_nat (Login.line l) ++ cRlF
 
   | Connect c =>
       "1 CONNECT " ++ Connect.destination_ip c ++ " " ++
-      string_of_nat (Connect.destination_port c) ++ CRLF ++
-      Connect.username c ++ CRLF ++
-      Connect.password c ++ CRLF ++
-      string_of_nat (Connect.line c) ++ CRLF
+      string_of_nat (Connect.destination_port c) ++ cRlF ++
+      Connect.username c ++ cRlF ++
+      Connect.password c ++ cRlF ++
+      string_of_nat (Connect.line c) ++ cRlF
 
   | Superuser s =>
-      "1 SUPERUSER" ++ CRLF ++
-      Superuser.username s ++ CRLF ++
-      Superuser.password s ++ CRLF ++
-      string_of_nat (Superuser.line s) ++ CRLF
+      "1 SUPERUSER" ++ cRlF ++
+      Superuser.username s ++ cRlF ++
+      Superuser.password s ++ cRlF ++
+      string_of_nat (Superuser.line s) ++ cRlF
 
   | Logout lo =>
-      "1 LOGOUT " ++ Logout.reason lo ++ CRLF ++
-      Logout.username lo ++ CRLF ++
-      Logout.password lo ++ CRLF ++
-      string_of_nat (Logout.line lo) ++ CRLF
+      "1 LOGOUT " ++ Logout.reason lo ++ cRlF ++
+      Logout.username lo ++ cRlF ++
+      Logout.password lo ++ cRlF ++
+      string_of_nat (Logout.line lo) ++ cRlF
 
   | Slipon so =>
-      "1 SLIPON " ++ Slipon.slip_address so ++ CRLF ++
-      Slipon.username so ++ CRLF ++
-      Slipon.password so ++ CRLF ++
-      string_of_nat (Slipon.line so) ++ CRLF
+      "1 SLIPON " ++ Slipon.slip_address so ++ cRlF ++
+      Slipon.username so ++ cRlF ++
+      Slipon.password so ++ cRlF ++
+      string_of_nat (Slipon.line so) ++ cRlF
 
   | Slipoff sf =>
-      "1 SLIPOFF " ++ Slipoff.reason sf ++ CRLF ++
-      Slipoff.username sf ++ CRLF ++
-      Slipoff.password sf ++ CRLF ++
-      string_of_nat (Slipoff.line sf) ++ CRLF
+      "1 SLIPOFF " ++ Slipoff.reason sf ++ cRlF ++
+      Slipoff.username sf ++ cRlF ++
+      Slipoff.password sf ++ cRlF ++
+      string_of_nat (Slipoff.line sf) ++ cRlF
+  end.
+
+(* Function that returns (f,r) - f - first part of s till first CRLF , r - part after CRLF *)
+Fixpoint tillFirstcRlF (s : string): string * string:=
+  match s with
+  | EmptyString => (EmptyString,EmptyString)
+  | String (Ascii true false true true false false false false) (String (Ascii false true false true false false false false) rest) => (EmptyString, rest)
+  | String c rest => let (f,r) := tillFirstcRlF rest in (String c (f), r)
   end.
 
 
+(* Takes string and returns list string; parts of s beetween CRLF *)
+Lemma tillFirst_gives_shorter_output :
+  forall s f r,
+    tillFirstcRlF s = (f,r) ->
+    length s > length r.
+Proof. admit. Admitted.
+
+Program Fixpoint splitincRlF (s:string) {measure (length s)} : list string :=
+  match s with
+  | EmptyString => []
+  | _ => let (f,r) := tillFirstcRlF s in f :: splitincRlF r
+  end.
+
+Next Obligation.
+  admit.
+Admitted.
 
 
 
-(* Parsing string to request *)

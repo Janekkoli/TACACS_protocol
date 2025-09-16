@@ -30,6 +30,10 @@ let () =
   let package = encode_request(Auth auth_data) in
   let package_string = (String.concat "" (List.map (String.make 1) package)) in
   Printf.printf "Encoded package: %s\n%!" package_string;
+  let firstline = tillFirstcRlF(package) in
+  let firstline_string = (String.concat "" (List.map (String.make 1) firstline)) in
+  Printf.printf "Firstline package: %s\n%!" firstline_string;
+
 
   ignore (write sock (Bytes.of_string package_string) 0 (String.length package_string));
   let buf = Bytes.create 1024 in

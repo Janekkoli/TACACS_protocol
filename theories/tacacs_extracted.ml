@@ -1,4 +1,7 @@
 
+type 'a sig0 = 'a
+  (* singleton inductive, whose constructor was exist *)
+
 type uint =
 | Nil
 | D0 of uint
@@ -55,92 +58,17 @@ module Nat =
  struct
   (** val to_little_uint : int -> uint -> uint **)
 
-  let rec to_little_uint n0 acc =
+  let rec to_little_uint n acc =
     (fun fO fS n -> if n=0 then fO () else fS (n-1))
       (fun _ -> acc)
-      (fun n1 -> to_little_uint n1 (Little.succ acc))
-      n0
+      (fun n0 -> to_little_uint n0 (Little.succ acc))
+      n
 
   (** val to_uint : int -> uint **)
 
-  let to_uint n0 =
-    rev (to_little_uint n0 (D0 Nil))
+  let to_uint n =
+    rev (to_little_uint n (D0 Nil))
  end
-
-type positive =
-| XI of positive
-| XO of positive
-| XH
-
-type n =
-| N0
-| Npos of positive
-
-module Pos =
- struct
-  (** val succ : positive -> positive **)
-
-  let rec succ = function
-  | XI p -> XO (succ p)
-  | XO p -> XI p
-  | XH -> XO XH
-
-  (** val of_succ_nat : int -> positive **)
-
-  let rec of_succ_nat n0 =
-    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-      (fun _ -> XH)
-      (fun x -> succ (of_succ_nat x))
-      n0
- end
-
-module N =
- struct
-  (** val of_nat : int -> n **)
-
-  let of_nat n0 =
-    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-      (fun _ -> N0)
-      (fun n' -> Npos (Pos.of_succ_nat n'))
-      n0
- end
-
-(** val zero : char **)
-
-let zero = '\000'
-
-(** val one : char **)
-
-let one = '\001'
-
-(** val shift : bool -> char -> char **)
-
-let shift = fun b c -> Char.chr (((Char.code c) lsl 1) land 255 + if b then 1 else 0)
-
-(** val ascii_of_pos : positive -> char **)
-
-let ascii_of_pos =
-  let rec loop n0 p =
-    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-      (fun _ -> zero)
-      (fun n' ->
-      match p with
-      | XI p' -> shift true (loop n' p')
-      | XO p' -> shift false (loop n' p')
-      | XH -> one)
-      n0
-  in loop (succ (succ (succ (succ (succ (succ (succ (succ 0))))))))
-
-(** val ascii_of_N : n -> char **)
-
-let ascii_of_N = function
-| N0 -> zero
-| Npos p -> ascii_of_pos p
-
-(** val ascii_of_nat : int -> char **)
-
-let ascii_of_nat a =
-  ascii_of_N (N.of_nat a)
 
 (** val append : char list -> char list -> char list **)
 
@@ -167,13 +95,30 @@ module NilEmpty =
   | D9 d0 -> '9'::(string_of_uint d0)
  end
 
-(** val cRLF : char list **)
+(** val fix_F_sub : ('a1 -> ('a1 -> 'a2) -> 'a2) -> 'a1 -> 'a2 **)
 
-let cRLF =
-  (ascii_of_nat (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ
-    (succ (succ (succ 0))))))))))))))::((ascii_of_nat (succ (succ (succ (succ
-                                          (succ (succ (succ (succ (succ (succ
-                                          0)))))))))))::[])
+let rec fix_F_sub f_sub x =
+  f_sub x (fun x0 -> fix_F_sub f_sub x0)
+
+(** val fix_sub : ('a1 -> ('a1 -> 'a2) -> 'a2) -> 'a1 -> 'a2 **)
+
+let fix_sub =
+  fix_F_sub
+
+(** val cR : char **)
+
+let cR =
+  '\r'
+
+(** val lF : char **)
+
+let lF =
+  '\n'
+
+(** val cRlF : char list **)
+
+let cRlF =
+  cR::(lF::[])
 
 module Auth =
  struct
@@ -361,8 +306,8 @@ type request =
 
 (** val string_of_nat : int -> char list **)
 
-let string_of_nat n0 =
-  NilEmpty.string_of_uint (Nat.to_uint n0)
+let string_of_nat n =
+  NilEmpty.string_of_uint (Nat.to_uint n)
 
 (** val encode_request : request -> char list **)
 
@@ -370,59 +315,181 @@ let encode_request = function
 | Auth a ->
   append ('1'::(' '::('A'::('U'::('T'::('H'::(' '::[])))))))
     (append a.Auth.style
-      (append cRLF
+      (append cRlF
         (append a.Auth.username
-          (append cRLF
+          (append cRlF
             (append a.Auth.password
-              (append cRLF (append (string_of_nat a.Auth.line) cRLF)))))))
+              (append cRlF (append (string_of_nat a.Auth.line) cRlF)))))))
 | Login l ->
   append ('1'::(' '::('L'::('O'::('G'::('I'::('N'::[])))))))
-    (append cRLF
+    (append cRlF
       (append l.Login.username
-        (append cRLF
+        (append cRlF
           (append l.Login.password
-            (append cRLF (append (string_of_nat l.Login.line) cRLF))))))
+            (append cRlF (append (string_of_nat l.Login.line) cRlF))))))
 | Connect c ->
   append
     ('1'::(' '::('C'::('O'::('N'::('N'::('E'::('C'::('T'::(' '::[]))))))))))
     (append c.Connect.destination_ip
       (append (' '::[])
         (append (string_of_nat c.Connect.destination_port)
-          (append cRLF
+          (append cRlF
             (append c.Connect.username
-              (append cRLF
+              (append cRlF
                 (append c.Connect.password
-                  (append cRLF (append (string_of_nat c.Connect.line) cRLF)))))))))
+                  (append cRlF (append (string_of_nat c.Connect.line) cRlF)))))))))
 | Superuser s ->
   append
     ('1'::(' '::('S'::('U'::('P'::('E'::('R'::('U'::('S'::('E'::('R'::[])))))))))))
-    (append cRLF
+    (append cRlF
       (append s.Superuser.username
-        (append cRLF
+        (append cRlF
           (append s.Superuser.password
-            (append cRLF (append (string_of_nat s.Superuser.line) cRLF))))))
+            (append cRlF (append (string_of_nat s.Superuser.line) cRlF))))))
 | Logout lo ->
   append ('1'::(' '::('L'::('O'::('G'::('O'::('U'::('T'::(' '::[])))))))))
     (append lo.Logout.reason
-      (append cRLF
+      (append cRlF
         (append lo.Logout.username
-          (append cRLF
+          (append cRlF
             (append lo.Logout.password
-              (append cRLF (append (string_of_nat lo.Logout.line) cRLF)))))))
+              (append cRlF (append (string_of_nat lo.Logout.line) cRlF)))))))
 | Slipon so ->
   append ('1'::(' '::('S'::('L'::('I'::('P'::('O'::('N'::(' '::[])))))))))
     (append so.Slipon.slip_address
-      (append cRLF
+      (append cRlF
         (append so.Slipon.username
-          (append cRLF
+          (append cRlF
             (append so.Slipon.password
-              (append cRLF (append (string_of_nat so.Slipon.line) cRLF)))))))
+              (append cRlF (append (string_of_nat so.Slipon.line) cRlF)))))))
 | Slipoff sf ->
   append
     ('1'::(' '::('S'::('L'::('I'::('P'::('O'::('F'::('F'::(' '::[]))))))))))
     (append sf.Slipoff.reason
-      (append cRLF
+      (append cRlF
         (append sf.Slipoff.username
-          (append cRLF
+          (append cRlF
             (append sf.Slipoff.password
-              (append cRLF (append (string_of_nat sf.Slipoff.line) cRLF)))))))
+              (append cRlF (append (string_of_nat sf.Slipoff.line) cRlF)))))))
+
+(** val tillFirstcRlF : char list -> char list * char list **)
+
+let rec tillFirstcRlF = function
+| [] -> ([], [])
+| c::rest ->
+  (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+    (fun b b0 b1 b2 b3 b4 b5 b6 ->
+    if b
+    then if b0
+         then let (f, r) = tillFirstcRlF rest in ((c::f), r)
+         else if b1
+              then if b2
+                   then if b3
+                        then let (f, r) = tillFirstcRlF rest in ((c::f), r)
+                        else if b4
+                             then let (f, r) = tillFirstcRlF rest in
+                                  ((c::f), r)
+                             else if b5
+                                  then let (f, r) = tillFirstcRlF rest in
+                                       ((c::f), r)
+                                  else if b6
+                                       then let (f, r) = tillFirstcRlF rest in
+                                            ((c::f), r)
+                                       else (match rest with
+                                             | [] ->
+                                               let (f, r) = tillFirstcRlF rest
+                                               in
+                                               ((c::f), r)
+                                             | a::rest0 ->
+                                               (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                 (fun b7 b8 b9 b10 b11 b12 b13 b14 ->
+                                                 if b7
+                                                 then let (f, r) =
+                                                        tillFirstcRlF rest
+                                                      in
+                                                      ((c::f), r)
+                                                 else if b8
+                                                      then if b9
+                                                           then let (
+                                                                  f, r) =
+                                                                  tillFirstcRlF
+                                                                    rest
+                                                                in
+                                                                ((c::f), r)
+                                                           else if b10
+                                                                then 
+                                                                  if b11
+                                                                  then 
+                                                                    let (
+                                                                    f, r) =
+                                                                    tillFirstcRlF
+                                                                    rest
+                                                                    in
+                                                                    ((c::f),
+                                                                    r)
+                                                                  else 
+                                                                    if b12
+                                                                    then 
+                                                                    let (
+                                                                    f, r) =
+                                                                    tillFirstcRlF
+                                                                    rest
+                                                                    in
+                                                                    ((c::f),
+                                                                    r)
+                                                                    else 
+                                                                    if b13
+                                                                    then 
+                                                                    let (
+                                                                    f, r) =
+                                                                    tillFirstcRlF
+                                                                    rest
+                                                                    in
+                                                                    ((c::f),
+                                                                    r)
+                                                                    else 
+                                                                    if b14
+                                                                    then 
+                                                                    let (
+                                                                    f, r) =
+                                                                    tillFirstcRlF
+                                                                    rest
+                                                                    in
+                                                                    ((c::f),
+                                                                    r)
+                                                                    else 
+                                                                    ([],
+                                                                    rest0)
+                                                                else 
+                                                                  let (
+                                                                    f, r) =
+                                                                    tillFirstcRlF
+                                                                    rest
+                                                                  in
+                                                                  ((c::f), r)
+                                                      else let (f, r) =
+                                                             tillFirstcRlF
+                                                               rest
+                                                           in
+                                                           ((c::f), r))
+                                                 a)
+                   else let (f, r) = tillFirstcRlF rest in ((c::f), r)
+              else let (f, r) = tillFirstcRlF rest in ((c::f), r)
+    else let (f, r) = tillFirstcRlF rest in ((c::f), r))
+    c
+
+(** val splitincRlF : char list -> char list list **)
+
+let splitincRlF =
+  fix_sub (fun recarg splitincRlF' ->
+    match recarg with
+    | [] -> []
+    | _::_ -> let (f, r) = tillFirstcRlF recarg in f :: (splitincRlF' r))

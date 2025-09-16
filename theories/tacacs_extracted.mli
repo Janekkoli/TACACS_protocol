@@ -1,4 +1,7 @@
 
+type 'a sig0 = 'a
+  (* singleton inductive, whose constructor was exist *)
+
 type uint =
 | Nil
 | D0 of uint
@@ -28,39 +31,6 @@ module Nat :
   val to_uint : int -> uint
  end
 
-type positive =
-| XI of positive
-| XO of positive
-| XH
-
-type n =
-| N0
-| Npos of positive
-
-module Pos :
- sig
-  val succ : positive -> positive
-
-  val of_succ_nat : int -> positive
- end
-
-module N :
- sig
-  val of_nat : int -> n
- end
-
-val zero : char
-
-val one : char
-
-val shift : bool -> char -> char
-
-val ascii_of_pos : positive -> char
-
-val ascii_of_N : n -> char
-
-val ascii_of_nat : int -> char
-
 val append : char list -> char list -> char list
 
 module NilEmpty :
@@ -68,7 +38,15 @@ module NilEmpty :
   val string_of_uint : uint -> char list
  end
 
-val cRLF : char list
+val fix_F_sub : ('a1 -> ('a1 -> 'a2) -> 'a2) -> 'a1 -> 'a2
+
+val fix_sub : ('a1 -> ('a1 -> 'a2) -> 'a2) -> 'a1 -> 'a2
+
+val cR : char
+
+val lF : char
+
+val cRlF : char list
 
 module Auth :
  sig
@@ -176,3 +154,7 @@ type request =
 val string_of_nat : int -> char list
 
 val encode_request : request -> char list
+
+val tillFirstcRlF : char list -> char list * char list
+
+val splitincRlF : char list -> char list list
