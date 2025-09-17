@@ -3,3 +3,8 @@
  (libraries unix zarith functions tacacs_extracted)
  (public_name tacacs-tests)
  (package tacacs))
+
+(executable
+ (name testrequest)
+ (libraries unix zarith functions tacacs_extracted)
+)
