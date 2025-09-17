@@ -216,3 +216,29 @@ Fixpoint splitSpacesList (s : list string) : list (list string) :=
 Definition splitonCRLFandSpaces (s:string) : list (list string) :=
   let splitedList := splitincRlF s in splitSpacesList splitedList.
 
+
+
+
+
+Record response := {
+      number : string; 
+      text : string
+}.
+  
+  
+  Definition encode_response (r : response) : string :=
+    number r ++ " " ++ text r ++ cRlF.
+  
+  
+  (* TODO: this sould check if string ends with CRLF and not put it in text *)
+  Definition parse_response (s : string) : option response :=
+    match s with
+    | String a (String b (String c (String (Ascii false false false false false true false false) rest))) => let (f,_) := tillFirstcRlF rest in 
+        match a with
+        | "2"%char => Some {| number := String a (String b (String c EmptyString)); text := f|}
+        | "4"%char => Some {| number := String a (String b (String c EmptyString)); text := f |}
+        | "5"%char => Some {| number := String a (String b (String c EmptyString)); text := f |}
+        | _ => None
+        end
+    | _ => None
+    end.

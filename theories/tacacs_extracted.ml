@@ -544,3 +544,128 @@ let rec splitSpacesList = function
 
 let splitonCRLFandSpaces s =
   let splitedList = splitincRlF s in splitSpacesList splitedList
+
+type response = { number : char list; text : char list }
+
+(** val encode_response : response -> char list **)
+
+let encode_response r =
+  append r.number (append (' '::[]) (append r.text cRlF))
+
+(** val parse_response : char list -> response option **)
+
+let parse_response = function
+| [] -> None
+| a::s0 ->
+  (match s0 with
+   | [] -> None
+   | b::s1 ->
+     (match s1 with
+      | [] -> None
+      | c::s2 ->
+        (match s2 with
+         | [] -> None
+         | a0::rest ->
+           (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+             (fun b0 b1 b2 b3 b4 b5 b6 b7 ->
+             if b0
+             then None
+             else if b1
+                  then None
+                  else if b2
+                       then None
+                       else if b3
+                            then None
+                            else if b4
+                                 then None
+                                 else if b5
+                                      then if b6
+                                           then None
+                                           else if b7
+                                                then None
+                                                else let (f, _) =
+                                                       tillFirstcRlF rest
+                                                     in
+                                                     (* If this appears, you're using Ascii internals. Please don't *)
+ (fun f c ->
+  let n = Char.code c in
+  let h i = (n land (1 lsl i)) <> 0 in
+  f (h 0) (h 1) (h 2) (h 3) (h 4) (h 5) (h 6) (h 7))
+                                                       (fun b8 b9 b10 b11 b12 b13 b14 b15 ->
+                                                       if b8
+                                                       then if b9
+                                                            then None
+                                                            else if b10
+                                                                 then 
+                                                                   if b11
+                                                                   then None
+                                                                   else 
+                                                                    if b12
+                                                                    then 
+                                                                    if b13
+                                                                    then 
+                                                                    if b14
+                                                                    then None
+                                                                    else 
+                                                                    if b15
+                                                                    then None
+                                                                    else 
+                                                                    Some
+                                                                    { number =
+                                                                    (a::(b::(c::[])));
+                                                                    text = f }
+                                                                    else None
+                                                                    else None
+                                                                 else None
+                                                       else if b9
+                                                            then if b10
+                                                                 then None
+                                                                 else 
+                                                                   if b11
+                                                                   then None
+                                                                   else 
+                                                                    if b12
+                                                                    then 
+                                                                    if b13
+                                                                    then 
+                                                                    if b14
+                                                                    then None
+                                                                    else 
+                                                                    if b15
+                                                                    then None
+                                                                    else 
+                                                                    Some
+                                                                    { number =
+                                                                    (a::(b::(c::[])));
+                                                                    text = f }
+                                                                    else None
+                                                                    else None
+                                                            else if b10
+                                                                 then 
+                                                                   if b11
+                                                                   then None
+                                                                   else 
+                                                                    if b12
+                                                                    then 
+                                                                    if b13
+                                                                    then 
+                                                                    if b14
+                                                                    then None
+                                                                    else 
+                                                                    if b15
+                                                                    then None
+                                                                    else 
+                                                                    Some
+                                                                    { number =
+                                                                    (a::(b::(c::[])));
+                                                                    text = f }
+                                                                    else None
+                                                                    else None
+                                                                 else None)
+                                                       a
+                                      else None)
+             a0)))

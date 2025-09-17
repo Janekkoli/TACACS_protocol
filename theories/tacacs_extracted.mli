@@ -166,3 +166,9 @@ val splitinSP : char list -> char list list
 val splitSpacesList : char list list -> char list list list
 
 val splitonCRLFandSpaces : char list -> char list list list
+
+type response = { number : char list; text : char list }
+
+val encode_response : response -> char list
+
+val parse_response : char list -> response option
