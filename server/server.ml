@@ -24,9 +24,17 @@ let () =
     let n = read client_sock buf 0 1024 in
     if n > 0 then begin
       Printf.printf "Received: %s\n%!" (Bytes.sub_string buf 0 n);
-      let res_code = List.nth ["211"; "420"; "517"; "000"] (Random.int 4) in
-      let res = { number = string_to_char_list res_code; text = string_to_char_list (Bytes.sub_string buf 0 n) } in
+      let responses = [
+        ("201", "accepted: # # #");
+        ("202", "accepted, password is expiring: # # #");
+        ("401", "no response; retry");
+        ("501", "invalid format");
+        ("502", "access denied")
+      ] in
+      let (res_code, res_text) = List.nth responses (Random.int (List.length responses)) in
+      let res = { number = string_to_char_list res_code; text = string_to_char_list res_text } in
       let charlistrequest = encode_response res in
+      let n = List.length charlistrequest in
       ignore (Printf.printf "Server response: %s\n%!" (char_list_to_string charlistrequest));
       ignore (write client_sock (Bytes.of_string (char_list_to_string charlistrequest) ) 0 n);
     end;
