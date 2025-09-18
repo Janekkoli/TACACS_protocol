@@ -1,5 +1,5 @@
 (executable
  (name server)
- (libraries unix zarith)
+ (libraries unix zarith tacacs_extracted functions)
  (public_name tacacs-server)
  (package tacacs))

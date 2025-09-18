@@ -1,5 +1,7 @@
 (* Simple TCP echo server *)
 open Unix
+open Functions
+open Tacacs_extracted
 
 let () =
   let argc = Array.length Sys.argv in
@@ -12,6 +14,7 @@ let () =
   bind sock sockaddr;
   listen sock 5;
   Printf.printf "Server listening on port %d\n%!" port;
+  Random.self_init ();  (* inicjalizacja generatora losowego *)
   while true do
     let (client_sock, client_addr) = accept sock in
     Printf.printf "Client connected: %s\n%!" (string_of_inet_addr (match client_addr with
@@ -21,7 +24,11 @@ let () =
     let n = read client_sock buf 0 1024 in
     if n > 0 then begin
       Printf.printf "Received: %s\n%!" (Bytes.sub_string buf 0 n);
-      ignore (write client_sock buf 0 n);
+      let res_code = List.nth ["211"; "420"; "517"; "000"] (Random.int 4) in
+      let res = { number = string_to_char_list res_code; text = string_to_char_list (Bytes.sub_string buf 0 n) } in
+      let charlistrequest = encode_response res in
+      ignore (Printf.printf "Server response: %s\n%!" (char_list_to_string charlistrequest));
+      ignore (write client_sock (Bytes.of_string (char_list_to_string charlistrequest) ) 0 n);
     end;
     close client_sock
   done
