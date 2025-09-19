@@ -74,22 +74,26 @@ let () =
               match pac with
               | Auth a ->
                 ignore (Printf.printf "Recived Auth request %s\n%!" (char_list_to_string a.username));
-                ("201", "accepted: # # #")
+                if UserDB.check_password db (char_list_to_string a.username) (char_list_to_string a.password) then (* Checking password *)
+                  List.nth [("201", "accepted: # # #"); ("202", "accepted, password is expiring: # # #")] (Random.int 2) (* 50% chance that the password is expiring*)
+                else
+                  ("502", "access denied, wrong password")
               | _ ->
                 ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
                 ("501", "invalid format") in
       
-      let (x, y) = response in
-      ignore (Printf.printf "Chosen response: %s %s\n%!" x y);
-
-      let responses = [
+      (* let responses = [
         ("201", "accepted: # # #");
         ("202", "accepted, password is expiring: # # #");
         ("401", "no response; retry");
         ("501", "invalid format");
         ("502", "access denied")
-      ] in
-      let (res_code, res_text) = List.nth responses (Random.int (List.length responses)) in
+      ] in *)
+      let (res_code, res_text) = if Random.int 5 < 4 then (* 20% chance there is no response *)
+        response
+      else
+        ("401", "no response; retry")
+      in
       let res = { number = string_to_char_list res_code; text = string_to_char_list res_text } in
       let charlistrequest = encode_response res in
       let n = List.length charlistrequest in
