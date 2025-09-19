@@ -41,7 +41,7 @@ let () =
           Auth.line =  12368;
           Auth.style = string_to_char_list "ascii";
           }
-        | "li" -> 
+      | "li" -> 
         let user = input_with_message "Type username: " in
         let password = input_with_message "Type password: " in
         Login {
@@ -49,7 +49,7 @@ let () =
           Login.password = string_to_char_list password;
           Login.line =  12368;
           }
-        | "c" -> 
+      | "c" -> 
         let user = input_with_message "Type username: " in
         let dip = input_with_message "Type destinationIP: " in
         let dp = input_with_message "Type destinationPort: " in
@@ -59,6 +59,13 @@ let () =
           Connect.line =  12368;
           Connect.destination_ip = string_to_char_list dip;
           Connect.destination_port = int_of_string dp;
+          }
+      | "su" -> 
+        let user = input_with_message "Type username: " in
+        Superuser {
+          Superuser.username = string_to_char_list user;
+          Superuser.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
+          Superuser.line =  12368;
           }
       | _ -> 
         Printf.printf "\nUnknown request type %s\n%!" request_type;

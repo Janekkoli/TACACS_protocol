@@ -100,6 +100,18 @@ let () =
                       ("502", "access denied")
                   else
                     ("504", "access denied, no existing connection")
+                | Superuser s ->
+                  ignore (Printf.printf "Recived Superuser request %s\n%!" (char_list_to_string s.username));
+                  if UserDB.is_active db (char_list_to_string s.username) then (* Checking if user is logged in *)
+                    if UserDB.is_admin db (char_list_to_string s.username) then
+                      begin
+                      ignore (Printf.printf "%s activated superuser mode\n%!" (char_list_to_string s.username));
+                      ("201", "accepted: 0 0 0")
+                      end
+                    else
+                      ("505", "access denied, you are not admin!")
+                  else
+                    ("504", "access denied, no existing connection")
                 | _ ->
                   ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
                   ("501", "invalid format") in

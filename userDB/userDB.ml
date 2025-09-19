@@ -50,6 +50,12 @@ let is_active db login =
   | Some u -> u.active
   | None -> false
 
+  (* sprawdzenie, czy jest adminem*)
+let is_admin db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> u.info = "admin"
+  | None -> false
+
 (* Wypisanie wszystkich użytkowników *)
 let print_all db =
   Hashtbl.iter
