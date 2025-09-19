@@ -125,11 +125,14 @@ let () =
                 | Slipon s ->
                   ignore (Printf.printf "Recived Slipon request %s\n%!" (char_list_to_string s.username));
                   if UserDB.is_active db (char_list_to_string s.username) then (* Checking if user is logged in *)
-                    begin
-                    ignore (UserDB.slipcon_on db (char_list_to_string s.username));
-                    ignore (Printf.printf "Slip conection on %s slipaddress %s\n%!" (char_list_to_string s.username) (char_list_to_string s.slip_address));
-                    ("201", "accepted: 0 0 0")
-                    end
+                    if UserDB.is_slip_connection_active db (char_list_to_string s.username) = false then (* Checking if user is already in slip mode *)
+                      begin
+                      ignore (UserDB.slipcon_on db (char_list_to_string s.username));
+                      ignore (Printf.printf "Slip conection on %s slipaddress %s\n%!" (char_list_to_string s.username) (char_list_to_string s.slip_address));
+                      ("201", "accepted: 0 0 0")
+                      end
+                    else
+                      ("506", "access denied, user is already in slip mode")
                   else
                     ("504", "access denied, no existing connection")
                 | Slipoff s ->
