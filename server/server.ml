@@ -24,7 +24,7 @@ let add_to_db db =
   UserDB.add_user db "zara" "star123" false "marketing" false
 
 (* 25% chance that the password is expiring*)
-let resp_random_positive =  List.nth [resp_accepted; resp_accepted_expiring] (Random.int 5 / 4) 
+let resp_random_positive () =  List.nth [resp_accepted; resp_accepted_expiring] (Random.int 5 / 4) 
 
 
 let generete_response (req : request option) db: response = 
@@ -41,7 +41,7 @@ let generete_response (req : request option) db: response =
           | Auth a ->
             ignore (Printf.printf "Recived Auth request %s\n%!" (char_list_to_string a.username));
             if UserDB.check_password db (char_list_to_string a.username) (char_list_to_string a.password) then (* Checking password *)
-              resp_random_positive  
+              resp_random_positive ()
             else
               resp_wrong_password
           | Login l ->
@@ -50,7 +50,7 @@ let generete_response (req : request option) db: response =
               begin
               ignore (UserDB.log_in db (char_list_to_string l.username));
               ignore (Printf.printf "Logged in %s\n%!" (char_list_to_string l.username));
-              resp_random_positive
+              resp_random_positive ()
               end
             else
               resp_wrong_password
