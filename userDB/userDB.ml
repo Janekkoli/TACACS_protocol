@@ -77,8 +77,10 @@ let slipcon_off db login =
 
 (* Wypisanie wszystkich użytkowników *)
 let print_all db =
+  Printf.printf "--- Użytkownicy w bazie ---\n";
+
   Hashtbl.iter
     (fun _ u ->
        Printf.printf "login=%s, active=%b, info=%s\n"
-         u.login u.active u.info)
-    db
+         u.login u.active u.info) db;
+  Printf.printf "----------------------------\n"

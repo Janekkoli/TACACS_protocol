@@ -242,3 +242,37 @@ Record response := {
         end
     | _ => None
     end.
+
+
+
+
+(* Example responses *)
+Definition resp_no_response : response :=
+  {| number := "401"; text := "no response; retry" |}.
+
+Definition resp_invalid_format : response :=
+  {| number := "501"; text := "invalid format" |}.
+
+Definition resp_accepted : response :=
+  {| number := "201"; text := "accepted: 0 0 0" |}.
+
+Definition resp_accepted_expiring : response :=
+  {| number := "202"; text := "accepted, password is expiring: 0 0 0" |}.
+
+Definition resp_wrong_password : response :=
+  {| number := "503"; text := "access denied, wrong password" |}.
+
+Definition resp_access_denied : response :=
+  {| number := "502"; text := "access denied" |}.
+
+Definition resp_no_connection : response :=
+  {| number := "504"; text := "access denied, no existing connection" |}.
+
+Definition resp_not_admin : response :=
+  {| number := "505"; text := "access denied, you are not admin!" |}.
+
+Definition resp_slip_mode : response :=
+  {| number := "506"; text := "access denied, user is already in slip mode" |}.
+
+Definition resp_no_slip_connection : response :=
+  {| number := "504"; text := "access denied, no existing slip connection" |}.
