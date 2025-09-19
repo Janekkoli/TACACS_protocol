@@ -20,24 +20,24 @@ let () =
   let db = UserDB.create () in (* inicjalizacja bazy użytkowników *)
 
   (* Dodanie użytkowników *)
-  UserDB.add_user db "alice" "secret" false "admin";
-  UserDB.add_user db "bob" "qwerty" false "guest";
-  UserDB.add_user db "charlie" "hunter2" false "developer";
-  UserDB.add_user db "david" "letmein" false "tester";
-  UserDB.add_user db "eve" "12345" false "attacker";
-  UserDB.add_user db "frank" "password" false "support";
-  UserDB.add_user db "grace" "iloveyou" false "manager";
-  UserDB.add_user db "heidi" "trustno1" false "intern";
-  UserDB.add_user db "ivan" "qazwsx" false "devops";
-  UserDB.add_user db "judy" "welcome" false "hr";
-  UserDB.add_user db "mallory" "abc123" false "analyst";
-  UserDB.add_user db "oscar" "dragon" false "researcher";
-  UserDB.add_user db "peggy" "sunshine" false "student";
-  UserDB.add_user db "trent" "shadow" false "architect";
-  UserDB.add_user db "victor" "master" false "consultant";
-  UserDB.add_user db "walter" "monkey" false "support";
-  UserDB.add_user db "yvonne" "flower" false "designer";
-  UserDB.add_user db "zara" "star123" false "marketing";
+  UserDB.add_user db "alice" "secret" false "admin" false;
+  UserDB.add_user db "bob" "qwerty" false "guest" false;
+  UserDB.add_user db "charlie" "hunter2" false "developer" false;
+  UserDB.add_user db "david" "letmein" false "tester" false;
+  UserDB.add_user db "eve" "12345" false "attacker" false;
+  UserDB.add_user db "frank" "password" false "support" false;
+  UserDB.add_user db "grace" "iloveyou" false "manager" false;
+  UserDB.add_user db "heidi" "trustno1" false "intern" false;
+  UserDB.add_user db "ivan" "qazwsx" false "devops" false;
+  UserDB.add_user db "judy" "welcome" false "hr" false;
+  UserDB.add_user db "mallory" "abc123" false "analyst" false;
+  UserDB.add_user db "oscar" "dragon" false "researcher" false;
+  UserDB.add_user db "peggy" "sunshine" false "student" false;
+  UserDB.add_user db "trent" "shadow" false "architect" false;
+  UserDB.add_user db "victor" "master" false "consultant" false;
+  UserDB.add_user db "walter" "monkey" false "support" false;
+  UserDB.add_user db "yvonne" "flower" false "designer" false;
+  UserDB.add_user db "zara" "star123" false "marketing" false;
 
 
   (* Sprawdzenie hasła *)
@@ -113,7 +113,7 @@ let () =
                   else
                     ("504", "access denied, no existing connection")
                 | Logout l ->
-                  ignore (Printf.printf "Recived Superuser request %s\n%!" (char_list_to_string l.username));
+                  ignore (Printf.printf "Recived Logout request %s\n%!" (char_list_to_string l.username));
                   if UserDB.is_active db (char_list_to_string l.username) then (* Checking if user is logged in *)
                     begin
                     ignore (UserDB.log_out db (char_list_to_string l.username));
@@ -122,10 +122,30 @@ let () =
                     end
                   else
                     ("504", "access denied, no existing connection")
-                | _ ->
+                | Slipon s ->
+                  ignore (Printf.printf "Recived Slipon request %s\n%!" (char_list_to_string s.username));
+                  if UserDB.is_active db (char_list_to_string s.username) then (* Checking if user is logged in *)
+                    begin
+                    ignore (UserDB.slipcon_on db (char_list_to_string s.username));
+                    ignore (Printf.printf "Slip conection on %s slipaddress %s\n%!" (char_list_to_string s.username) (char_list_to_string s.slip_address));
+                    ("201", "accepted: 0 0 0")
+                    end
+                  else
+                    ("504", "access denied, no existing connection")
+                | Slipoff s ->
+                  ignore (Printf.printf "Recived Slipon request %s\n%!" (char_list_to_string s.username));
+                  if UserDB.is_slip_connection_active db (char_list_to_string s.username) then (* Checking if user is logged in *)
+                    begin
+                    ignore (UserDB.slipcon_off db (char_list_to_string s.username));
+                    ignore (Printf.printf "Slip conection off %s reason %s\n%!" (char_list_to_string s.username) (char_list_to_string s.reason));
+                    ("201", "accepted: 0 0 0")
+                    end
+                  else
+                    ("504", "access denied, no existing slip connection")
+                (* | _ ->
                   ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
-                  ("501", "invalid format") in
-      
+                  ("501", "invalid format")*)
+                in
       let (res_code, res_text) = response in
       let res = { number = string_to_char_list res_code; text = string_to_char_list res_text } in
       let charlistrequest = encode_response res in

@@ -75,6 +75,23 @@ let () =
           Logout.line =  12368;
           Logout.reason = string_to_char_list "user-logged-out";
           }
+      | "so" -> 
+        let user = input_with_message "Type username: " in
+        let slip_address = input_with_message "Type slipaddress: " in
+        Slipon {
+          Slipon.username = string_to_char_list user;
+          Slipon.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
+          Slipon.line =  12368;
+          Slipon.slip_address = string_to_char_list slip_address;
+          }
+      | "sf" -> 
+        let user = input_with_message "Type username: " in
+        Slipoff {
+          Slipoff.username = string_to_char_list user;
+          Slipoff.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
+          Slipoff.line =  12368;
+          Slipoff.reason = string_to_char_list "user-terminated";
+          }
       | _ -> 
         Printf.printf "\nUnknown request type %s\n%!" request_type;
         exit 1

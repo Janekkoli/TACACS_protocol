@@ -4,6 +4,7 @@ type user = {
   password : string;
   active : bool;
   info : string;
+  slipcon : bool;
 }
 
 (* Typ bazy danych użytkowników *)
@@ -14,8 +15,8 @@ let create () : t =
   Hashtbl.create 18
 
 (* Dodanie nowego użytkownika *)
-let add_user db login password active info =
-  let u = { login; password; active; info } in
+let add_user db login password active info slipcon =
+  let u = { login; password; active; info; slipcon} in
   Hashtbl.replace db login u
 
 (* Pobranie użytkownika *)
@@ -55,6 +56,24 @@ let is_admin db login =
   match Hashtbl.find_opt db login with
   | Some u -> u.info = "admin"
   | None -> false
+
+(* sprawdzenie, czy jest zalogowany*)
+let is_slip_connection_active db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> u.slipcon
+  | None -> false
+
+(* Slip Connection ON *)
+let slipcon_on db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> Hashtbl.replace db login { u with slipcon = true }
+  | None -> ()
+
+(* Slip Connection OFF*)
+let slipcon_off db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> Hashtbl.replace db login { u with slipcon = false }
+  | None -> ()
 
 (* Wypisanie wszystkich użytkowników *)
 let print_all db =
