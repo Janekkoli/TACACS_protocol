@@ -20,24 +20,24 @@ let () =
   let db = UserDB.create () in (* inicjalizacja bazy użytkowników *)
 
   (* Dodanie użytkowników *)
-  UserDB.add_user db "alice" "secret" "offline" "admin";
-  UserDB.add_user db "bob" "qwerty" "offline" "guest";
-  UserDB.add_user db "charlie" "hunter2" "offline" "developer";
-  UserDB.add_user db "david" "letmein" "offline" "tester";
-  UserDB.add_user db "eve" "12345" "offline" "attacker";
-  UserDB.add_user db "frank" "password" "offline" "support";
-  UserDB.add_user db "grace" "iloveyou" "offline" "manager";
-  UserDB.add_user db "heidi" "trustno1" "offline" "intern";
-  UserDB.add_user db "ivan" "qazwsx" "offline" "devops";
-  UserDB.add_user db "judy" "welcome" "offline" "hr";
-  UserDB.add_user db "mallory" "abc123" "offline" "analyst";
-  UserDB.add_user db "oscar" "dragon" "offline" "researcher";
-  UserDB.add_user db "peggy" "sunshine" "offline" "student";
-  UserDB.add_user db "trent" "shadow" "offline" "architect";
-  UserDB.add_user db "victor" "master" "offline" "consultant";
-  UserDB.add_user db "walter" "monkey" "offline" "support";
-  UserDB.add_user db "yvonne" "flower" "offline" "designer";
-  UserDB.add_user db "zara" "star123" "offline" "marketing";
+  UserDB.add_user db "alice" "secret" false "admin";
+  UserDB.add_user db "bob" "qwerty" false "guest";
+  UserDB.add_user db "charlie" "hunter2" false "developer";
+  UserDB.add_user db "david" "letmein" false "tester";
+  UserDB.add_user db "eve" "12345" false "attacker";
+  UserDB.add_user db "frank" "password" false "support";
+  UserDB.add_user db "grace" "iloveyou" false "manager";
+  UserDB.add_user db "heidi" "trustno1" false "intern";
+  UserDB.add_user db "ivan" "qazwsx" false "devops";
+  UserDB.add_user db "judy" "welcome" false "hr";
+  UserDB.add_user db "mallory" "abc123" false "analyst";
+  UserDB.add_user db "oscar" "dragon" false "researcher";
+  UserDB.add_user db "peggy" "sunshine" false "student";
+  UserDB.add_user db "trent" "shadow" false "architect";
+  UserDB.add_user db "victor" "master" false "consultant";
+  UserDB.add_user db "walter" "monkey" false "support";
+  UserDB.add_user db "yvonne" "flower" false "designer";
+  UserDB.add_user db "zara" "star123" false "marketing";
 
 
   (* Sprawdzenie hasła *)
@@ -65,22 +65,35 @@ let () =
     if n > 0 then begin
       let response = 
         ignore (Printf.printf "Received: %s\n%!" (Bytes.sub_string buf 0 n));
-        let parsed = parse_request (string_to_char_list (Bytes.sub_string buf 0 n)) in
-          match parsed with
-          | None ->
-            ignore (Printf.printf "Received unknown request type\n%!");
-            ("501", "invalid format")
-          | Some pac -> 
-              match pac with
-              | Auth a ->
-                ignore (Printf.printf "Recived Auth request %s\n%!" (char_list_to_string a.username));
-                if UserDB.check_password db (char_list_to_string a.username) (char_list_to_string a.password) then (* Checking password *)
-                  List.nth [("201", "accepted: # # #"); ("202", "accepted, password is expiring: # # #")] (Random.int 2) (* 50% chance that the password is expiring*)
-                else
-                  ("502", "access denied, wrong password")
-              | _ ->
-                ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
-                ("501", "invalid format") in
+        if Random.int 5 = 0 then (* 20% chance there is no response *)
+          ("401", "no response; retry")
+        else
+          let parsed = parse_request (string_to_char_list (Bytes.sub_string buf 0 n)) in
+            match parsed with
+            | None ->
+              ignore (Printf.printf "Received unknown request type\n%!");
+              ("501", "invalid format")
+            | Some pac -> 
+                match pac with
+                | Auth a ->
+                  ignore (Printf.printf "Recived Auth request %s\n%!" (char_list_to_string a.username));
+                  if UserDB.check_password db (char_list_to_string a.username) (char_list_to_string a.password) then (* Checking password *)
+                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 2) (* 50% chance that the password is expiring*)
+                  else
+                    ("502", "access denied, wrong password")
+                | Login l ->
+                  ignore (Printf.printf "Recived Login request %s\n%!" (char_list_to_string l.username));
+                  if UserDB.check_password db (char_list_to_string l.username) (char_list_to_string l.password) then (* Checking password *)
+                    begin
+                    ignore (UserDB.log_in db (char_list_to_string l.username));
+                    ignore (Printf.printf "Logged in %s\n%!" (char_list_to_string l.username));
+                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 2) (* 50% chance that the password is expiring*)
+                    end
+                  else
+                    ("502", "access denied, wrong password")
+                | _ ->
+                  ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
+                  ("501", "invalid format") in
       
       (* let responses = [
         ("201", "accepted: # # #");
@@ -89,11 +102,7 @@ let () =
         ("501", "invalid format");
         ("502", "access denied")
       ] in *)
-      let (res_code, res_text) = if Random.int 5 < 4 then (* 20% chance there is no response *)
-        response
-      else
-        ("401", "no response; retry")
-      in
+      let (res_code, res_text) = response in
       let res = { number = string_to_char_list res_code; text = string_to_char_list res_text } in
       let charlistrequest = encode_response res in
       let n = List.length charlistrequest in

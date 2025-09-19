@@ -2,7 +2,7 @@
 type user = {
   login : string;
   password : string;
-  state : string;
+  active : bool;
   info : string;
 }
 
@@ -11,21 +11,27 @@ type t = (string, user) Hashtbl.t
 
 (* Utworzenie pustej bazy *)
 let create () : t =
-  Hashtbl.create 16
+  Hashtbl.create 18
 
 (* Dodanie nowego użytkownika *)
-let add_user db login password state info =
-  let u = { login; password; state; info } in
+let add_user db login password active info =
+  let u = { login; password; active; info } in
   Hashtbl.replace db login u
 
 (* Pobranie użytkownika *)
 let get_user db login =
   Hashtbl.find_opt db login
 
-(* Aktualizacja stanu użytkownika *)
-let update_state db login new_state =
+(* Zalogowanie *)
+let log_in db login =
   match Hashtbl.find_opt db login with
-  | Some u -> Hashtbl.replace db login { u with state = new_state }
+  | Some u -> Hashtbl.replace db login { u with active = true }
+  | None -> ()
+
+(* Wylogowanie*)
+let log_out db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> Hashtbl.replace db login { u with active = false }
   | None -> ()
 
 (* Usunięcie użytkownika *)
@@ -38,10 +44,16 @@ let check_password db login password =
   | Some u -> u.password = password
   | None -> false
 
+(* sprawdzenie, czy jest zalogowany*)
+let is_active db login =
+  match Hashtbl.find_opt db login with
+  | Some u -> u.active
+  | None -> false
+
 (* Wypisanie wszystkich użytkowników *)
 let print_all db =
   Hashtbl.iter
     (fun _ u ->
-       Printf.printf "login=%s, state=%s, info=%s\n"
-         u.login u.state u.info)
+       Printf.printf "login=%s, active=%b, info=%s\n"
+         u.login u.active u.info)
     db
