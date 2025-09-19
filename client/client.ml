@@ -67,6 +67,14 @@ let () =
           Superuser.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
           Superuser.line =  12368;
           }
+      | "lo" -> 
+        let user = input_with_message "Type username: " in
+        Logout {
+          Logout.username = string_to_char_list user;
+          Logout.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
+          Logout.line =  12368;
+          Logout.reason = string_to_char_list "user-logged-out";
+          }
       | _ -> 
         Printf.printf "\nUnknown request type %s\n%!" request_type;
         exit 1
