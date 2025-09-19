@@ -65,7 +65,7 @@ let () =
     if n > 0 then begin
       let response = 
         ignore (Printf.printf "Received: %s\n%!" (Bytes.sub_string buf 0 n));
-        if Random.int 5 = 0 then (* 20% chance there is no response *)
+        if Random.int 8 = 0 then (* 12.5% chance there is no response *)
           ("401", "no response; retry")
         else
           let parsed = parse_request (string_to_char_list (Bytes.sub_string buf 0 n)) in
@@ -78,30 +78,32 @@ let () =
                 | Auth a ->
                   ignore (Printf.printf "Recived Auth request %s\n%!" (char_list_to_string a.username));
                   if UserDB.check_password db (char_list_to_string a.username) (char_list_to_string a.password) then (* Checking password *)
-                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 2) (* 50% chance that the password is expiring*)
+                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 5 / 4) (* 25% chance that the password is expiring*)
                   else
-                    ("502", "access denied, wrong password")
+                    ("503", "access denied, wrong password")
                 | Login l ->
                   ignore (Printf.printf "Recived Login request %s\n%!" (char_list_to_string l.username));
                   if UserDB.check_password db (char_list_to_string l.username) (char_list_to_string l.password) then (* Checking password *)
                     begin
                     ignore (UserDB.log_in db (char_list_to_string l.username));
                     ignore (Printf.printf "Logged in %s\n%!" (char_list_to_string l.username));
-                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 2) (* 50% chance that the password is expiring*)
+                    List.nth [("201", "accepted: 0 0 0"); ("202", "accepted, password is expiring: 0 0 0")] (Random.int 5 / 4) (* 25% chance that the password is expiring*)
                     end
                   else
-                    ("502", "access denied, wrong password")
+                    ("503", "access denied, wrong password")
+                | Connect c ->
+                  ignore (Printf.printf "Recived Connect request %s\n%!" (char_list_to_string c.username));
+                  if UserDB.is_active db (char_list_to_string c.username) then (* Checking if user is logged in *)
+                    if Random.int 4 < 3 then (* 75% chance for accept*)
+                      ("201", "accepted: 0 0 0")
+                    else
+                      ("502", "access denied")
+                  else
+                    ("504", "access denied, no existing connection")
                 | _ ->
                   ignore (Printf.printf "Received unknown request type, but not None: %s\n%!" (char_list_to_string (encode_request pac)));
                   ("501", "invalid format") in
       
-      (* let responses = [
-        ("201", "accepted: # # #");
-        ("202", "accepted, password is expiring: # # #");
-        ("401", "no response; retry");
-        ("501", "invalid format");
-        ("502", "access denied")
-      ] in *)
       let (res_code, res_text) = response in
       let res = { number = string_to_char_list res_code; text = string_to_char_list res_text } in
       let charlistrequest = encode_response res in

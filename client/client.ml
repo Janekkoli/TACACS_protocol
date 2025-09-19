@@ -29,18 +29,44 @@ let () =
     let server_ip = Sys.argv.(1) in
     let port = int_of_string Sys.argv.(2) in
   
-  let user = input_with_message "Podaj nazwe uzytkownika: " in
-  let password = input_with_message "Podaj haslo: " in
+  let request_type = input_with_message "Request type\na - auth\nli - login\nc - connect\nsu - superuser\nlo - logout\nso - slipon\nsf - slipoff\n: " in
+  let request = 
+    match request_type with
+      | "a" -> 
+        let user = input_with_message "Type username: " in
+        let password = input_with_message "Type password: " in
+        Auth {
+          Auth.username = string_to_char_list user;
+          Auth.password = string_to_char_list password;
+          Auth.line =  12368;
+          Auth.style = string_to_char_list "ascii";
+          }
+        | "li" -> 
+        let user = input_with_message "Type username: " in
+        let password = input_with_message "Type password: " in
+        Login {
+          Login.username = string_to_char_list user;
+          Login.password = string_to_char_list password;
+          Login.line =  12368;
+          }
+        | "c" -> 
+        let user = input_with_message "Type username: " in
+        let dip = input_with_message "Type destinationIP: " in
+        let dp = input_with_message "Type destinationPort: " in
+        Connect {
+          Connect.username = string_to_char_list user;
+          Connect.password = string_to_char_list "-"; (* According to documentation this should be empty string, but COQ is too complicated *)
+          Connect.line =  12368;
+          Connect.destination_ip = string_to_char_list dip;
+          Connect.destination_port = int_of_string dp;
+          }
+      | _ -> 
+        Printf.printf "\nUnknown request type %s\n%!" request_type;
+        exit 1
+          
+  in
   let sock = socket PF_INET SOCK_STREAM 0 in
-  
-  let auth_data = {
-    Auth.username = string_to_char_list user;
-    Auth.password = string_to_char_list password;
-    Auth.line =  12368;
-    Auth.style = string_to_char_list "ascii";
-  } in
-
-  let resp = send_request (Auth auth_data)  sock server_ip port in
+  let resp = send_request ((*Auth auth_data*) request)  sock server_ip port in
   match resp with
   |None -> Printf.printf ":()"
   | Some resp -> let resp_string = char_list_to_string (encode_response resp) in
