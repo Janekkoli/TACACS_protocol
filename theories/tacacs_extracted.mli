@@ -172,3 +172,23 @@ type response = { number : char list; text : char list }
 val encode_response : response -> char list
 
 val parse_response : char list -> response option
+
+val resp_no_response : response
+
+val resp_invalid_format : response
+
+val resp_accepted : response
+
+val resp_accepted_expiring : response
+
+val resp_wrong_password : response
+
+val resp_access_denied : response
+
+val resp_no_connection : response
+
+val resp_not_admin : response
+
+val resp_slip_mode : response
+
+val resp_no_slip_connection : response
