@@ -147,6 +147,68 @@ let logout_once username line server_ip port =
       else
         true
 
+let rec slipon_until_succ username line server_ip port =
+  let request = prepare_slipon_request username line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      if yes_or_no "Do you want to try again?(Y/n): " then
+        slipon_until_succ username line server_ip port
+      else false
+    | Some response ->
+      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Slipon accepted\n\n%!");
+        true
+        end
+      else
+        if yes_or_no "Do you want to try again?(Y/n): " then
+          slipon_until_succ username line server_ip port
+        else false
+
+let slipoff_once username line server_ip port = 
+let request = prepare_slipoff_request username line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      true
+    | Some response ->
+      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Slipoff accepted\n\n%!");
+        true
+        end
+      else
+        true
+
+let rec superuser_until_succ username line server_ip port =
+  let request = prepare_superuser_request username line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      if yes_or_no "Do you want to try again?(Y/n): " then
+        superuser_until_succ username line server_ip port
+      else false
+    | Some response ->
+      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Superuser accepted\n\n%!");
+        true
+        end
+      else
+        if yes_or_no "Do you want to try again?(Y/n): " then
+          superuser_until_succ username line server_ip port
+        else false
+
 let () =
   let argc = Array.length Sys.argv in
   if argc != 3 then
@@ -155,8 +217,8 @@ let () =
     let server_ip = Sys.argv.(1) in
     let port = int_of_string Sys.argv.(2) in
   
-  let connection_type = input_with_message "What type of connection would you like to establish?\n1 - Authenticate only\n2 - Login connection\n3 - SLIP connection\n: " in
-  if connection_type <> "1" && connection_type <> "2" && connection_type <> "3" then
+  let connection_type = input_with_message "What type of connection would you like to establish?\n1 - Authenticate only\n2 - Login connection\n3 - SLIP connection\n4 - Login connection with superuser\n: " in
+  if connection_type <> "1" && connection_type <> "2" && connection_type <> "3" && connection_type <> "4" then
     begin
       Printf.printf "\nUnknown connection type \"%s\"\n%!" connection_type;
       exit 1
@@ -188,36 +250,30 @@ let () =
         exit 1
       
     | "3" ->
-      ignore (login_util_succ username password line server_ip port)
+      if login_util_succ username password line server_ip port then
+        begin
+        ignore (connect_until_no username line server_ip port);
+        ignore (slipon_until_succ username line server_ip port);
+        ignore (logout_once username line server_ip port);
+        ignore (slipoff_once username line server_ip port);
+        exit 0
+        end
+      else
+        exit 1
+
+    | "4" ->
+      if login_util_succ username password line server_ip port then
+        begin
+        ignore (connect_until_no username line server_ip port);
+        ignore (superuser_until_succ username line server_ip port);
+        ignore (connect_until_no username line server_ip port);
+        ignore (logout_once username line server_ip port);
+        exit 0
+        end
+      else
+        exit 1
         
     | _ ->
-      Printf.printf "\nUnknown connection type \"%s\"\n%!" connection_type;
+      ignore (Printf.printf "\nUnknown connection type \"%s\"\n%!" connection_type);
+      exit 1
     
-  
-  let request_type = input_with_message "Request type\na - auth\nli - login\nc - connect\nsu - superuser\nlo - logout\nso - slipon\nsf - slipoff\n: " in
-  let request = 
-    match request_type with
-      | "a" -> 
-        prepare_auth_request username password line
-      | "li" -> 
-        prepare_login_request username password line
-      | "c" -> 
-        prepare_connect_request username line
-      | "su" -> 
-        prepare_superuser_request username line
-      | "lo" -> 
-        prepare_logout_request username line
-      | "so" -> 
-        prepare_slipon_request username line
-      | "sf" -> 
-        prepare_slipoff_request username line
-      | _ -> 
-        Printf.printf "\nUnknown request type %s\n%!" request_type;
-        exit 1
-  in
-  let sock = socket PF_INET SOCK_STREAM 0 in
-  let resp = send_request ((*Auth auth_data*) request)  sock server_ip port in
-  match resp with
-  |None -> Printf.printf ":()"
-  | Some resp -> let resp_string = char_list_to_string (encode_response resp) in
-  Printf.printf "recived: %s\n" resp_string
