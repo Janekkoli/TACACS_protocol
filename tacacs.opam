@@ -10,11 +10,10 @@ name: "tacacs"
 
 depends: [
   "ocaml"
-  "dune" {>= "2.5"}
-#   "coq" {>= "8.12" & < "8.14~" | = "dev"}
-#  "coq-freespec-core" {= "0.3" }
-#  "coq-freespec-exec" {= "0.3" }
-#  "coq-simple-io" {>= "1.5" | = "dev"}
+  "dune"
+   "coq" 
+   "lwt"
+  
 ]
 
 build: [
