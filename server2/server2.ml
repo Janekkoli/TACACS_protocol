@@ -97,7 +97,7 @@ let generete_response (req : request option) db: response =
             else
               resp_no_connection
           | Slipoff s ->
-            ignore (Printf.printf "Recived Slipon request %s\n%!" (char_list_to_string s.username));
+            ignore (Printf.printf "Recived Slipoff request %s\n%!" (char_list_to_string s.username));
             if UserDB.is_slip_connection_active db (char_list_to_string s.username) then (* Checking if user is logged in *)
               begin
               ignore (UserDB.slipcon_off db (char_list_to_string s.username));
