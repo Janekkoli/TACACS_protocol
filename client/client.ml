@@ -18,7 +18,7 @@ let input_with_message(s) =
   try
     read_line ()
   with End_of_file ->
-    print_endline "\nKoniec wejścia – program kończy działanie.";
+    print_endline "\nEnd of input – program ends.";
     exit 1
 
 let prepare_auth_request username password line = 
@@ -86,6 +86,24 @@ let rec yes_or_no question =
     | "N" | "n" -> false
     | _ -> yes_or_no question
 
+let auth_once username password line server_ip port =
+  let request = prepare_auth_request username password line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      true
+    | Some response ->
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Auth accepted\n\n%!");
+        true
+        end
+      else
+        true
+
 let rec login_util_succ username password line server_ip port = 
   let request = prepare_login_request username password line in
   let sock = socket PF_INET SOCK_STREAM 0 in
@@ -97,7 +115,7 @@ let rec login_util_succ username password line server_ip port =
         login_util_succ username password line server_ip port
       else false
     | Some response ->
-      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
       if List.nth response.number 0 = '2' then
         begin
         ignore (Printf.printf "Login accepted\n\n%!");
@@ -120,7 +138,7 @@ let rec connect_until_no username line server_ip port =
         ignore (Printf.printf "Failed to receive response.\n");
         connect_until_no username line server_ip port
       | Some response ->
-        ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+        ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
         if List.nth response.number 0 = '2' then
           begin
           ignore (Printf.printf "Connect accepted\n\n%!");
@@ -138,7 +156,7 @@ let logout_once username line server_ip port =
       ignore (Printf.printf "Failed to receive response.\n");
       true
     | Some response ->
-      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
       if List.nth response.number 0 = '2' then
         begin
         ignore (Printf.printf "Logout accepted\n\n%!");
@@ -158,7 +176,7 @@ let rec slipon_until_succ username line server_ip port =
         slipon_until_succ username line server_ip port
       else false
     | Some response ->
-      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
       if List.nth response.number 0 = '2' then
         begin
         ignore (Printf.printf "Slipon accepted\n\n%!");
@@ -178,7 +196,7 @@ let request = prepare_slipoff_request username line in
       ignore (Printf.printf "Failed to receive response.\n");
       true
     | Some response ->
-      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
       if List.nth response.number 0 = '2' then
         begin
         ignore (Printf.printf "Slipoff accepted\n\n%!");
@@ -198,7 +216,7 @@ let rec superuser_until_succ username line server_ip port =
         superuser_until_succ username line server_ip port
       else false
     | Some response ->
-      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      ignore (Printf.printf "    (Recived: %s %s)\n" (char_list_to_string response.number) (char_list_to_string response.text));
       if List.nth response.number 0 = '2' then
         begin
         ignore (Printf.printf "Superuser accepted\n\n%!");
@@ -231,13 +249,9 @@ let () =
   match connection_type with
 
     | "1" ->
-      let request = prepare_auth_request username password line in
-      let sock = socket PF_INET SOCK_STREAM 0 in
-      let resp = send_request request  sock server_ip port in
-      (match resp with
-        | None -> Printf.printf ":()"
-        | Some resp -> let resp_string = char_list_to_string (encode_response resp) in
-      Printf.printf "Recived: %s\n" resp_string)
+      begin
+      ignore (auth_once username password line server_ip port)
+      end
 
     | "2" ->
       if login_util_succ username password line server_ip port then
