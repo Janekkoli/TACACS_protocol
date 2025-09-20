@@ -1,5 +1,5 @@
 (executable
- (name echo)
+ (name server2)
  (libraries unix zarith tacacs_extracted functions userDB lwt lwt.unix)
  (public_name tacacs-server2)
  (package tacacs))
