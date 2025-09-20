@@ -79,6 +79,74 @@ let prepare_slipoff_request username line =
     Slipoff.reason = string_to_char_list "user-terminated";
     }
 
+let rec yes_or_no question =
+  let answer = input_with_message question in
+  match answer with
+    | "Y" | "y" | "" -> true
+    | "N" | "n" -> false
+    | _ -> yes_or_no question
+
+let rec login_util_succ username password line server_ip port = 
+  let request = prepare_login_request username password line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      if yes_or_no "Do you want to try again?(Y/n): " then
+        login_util_succ username password line server_ip port
+      else false
+    | Some response ->
+      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Login accepted\n\n%!");
+        true
+        end
+      else
+        if yes_or_no "Do you want to try again?(Y/n): " then
+          login_util_succ username password line server_ip port
+        else false
+
+let rec connect_until_no username line server_ip port = 
+  if yes_or_no "Do you want to send connect packet?(Y/n): " = false then
+    true
+  else
+    let request = prepare_connect_request username line in
+    let sock = socket PF_INET SOCK_STREAM 0 in
+    let resp = send_request request sock server_ip port in
+    match resp with
+      | None ->
+        ignore (Printf.printf "Failed to receive response.\n");
+        connect_until_no username line server_ip port
+      | Some response ->
+        ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+        if List.nth response.number 0 = '2' then
+          begin
+          ignore (Printf.printf "Connect accepted\n\n%!");
+          connect_until_no username line server_ip port
+          end
+        else
+          connect_until_no username line server_ip port
+      
+let logout_once username line server_ip port =
+  let request = prepare_logout_request username line in
+  let sock = socket PF_INET SOCK_STREAM 0 in
+  let resp = send_request request sock server_ip port in
+  match resp with
+    | None ->
+      ignore (Printf.printf "Failed to receive response.\n");
+      true
+    | Some response ->
+      ignore (Printf.printf "Recived: %s %s\n" (char_list_to_string response.number) (char_list_to_string response.text));
+      if List.nth response.number 0 = '2' then
+        begin
+        ignore (Printf.printf "Logout accepted\n\n%!");
+        true
+        end
+      else
+        true
+
 let () =
   let argc = Array.length Sys.argv in
   if argc != 3 then
@@ -98,10 +166,32 @@ let () =
   let password = input_with_message "Type password: " in
   let line = int_of_string (input_with_message "Type line: ") in
 
-  (* match connection_type with
+  match connection_type with
+
     | "1" ->
+      let request = prepare_auth_request username password line in
+      let sock = socket PF_INET SOCK_STREAM 0 in
+      let resp = send_request request  sock server_ip port in
+      (match resp with
+        | None -> Printf.printf ":()"
+        | Some resp -> let resp_string = char_list_to_string (encode_response resp) in
+      Printf.printf "Recived: %s\n" resp_string)
+
     | "2" ->
-    | "3" -> *)
+      if login_util_succ username password line server_ip port then
+        begin
+        ignore (connect_until_no username line server_ip port);
+        ignore (logout_once username line server_ip port);
+        exit 0
+        end
+      else
+        exit 1
+      
+    | "3" ->
+      ignore (login_util_succ username password line server_ip port)
+        
+    | _ ->
+      Printf.printf "\nUnknown connection type \"%s\"\n%!" connection_type;
     
   
   let request_type = input_with_message "Request type\na - auth\nli - login\nc - connect\nsu - superuser\nlo - logout\nso - slipon\nsf - slipoff\n: " in
