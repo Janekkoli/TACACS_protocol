@@ -102,7 +102,10 @@ let auth_once username password line server_ip port =
         true
         end
       else
+        begin
+        ignore (Printf.printf "Auth rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         true
+        end
 
 let rec login_util_succ username password line server_ip port = 
   let request = prepare_login_request username password line in
@@ -122,9 +125,12 @@ let rec login_util_succ username password line server_ip port =
         true
         end
       else
+        begin
+        ignore (Printf.printf "Login rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         if yes_or_no "Do you want to try again?(Y/n): " then
           login_util_succ username password line server_ip port
         else false
+        end
 
 let rec connect_until_no username line server_ip port = 
   if yes_or_no "Do you want to send connect packet?(Y/n): " = false then
@@ -145,7 +151,10 @@ let rec connect_until_no username line server_ip port =
           connect_until_no username line server_ip port
           end
         else
+          begin
+          ignore (Printf.printf "Connect rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
           connect_until_no username line server_ip port
+          end
       
 let logout_once username line server_ip port =
   let request = prepare_logout_request username line in
@@ -163,7 +172,10 @@ let logout_once username line server_ip port =
         true
         end
       else
+        begin
+        ignore (Printf.printf "Logout rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         true
+        end
 
 let rec slipon_until_succ username line server_ip port =
   let request = prepare_slipon_request username line in
@@ -183,9 +195,12 @@ let rec slipon_until_succ username line server_ip port =
         true
         end
       else
+        begin
+        ignore (Printf.printf "Slipon rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         if yes_or_no "Do you want to try again?(Y/n): " then
           slipon_until_succ username line server_ip port
         else false
+        end
 
 let slipoff_once username line server_ip port = 
 let request = prepare_slipoff_request username line in
@@ -203,7 +218,10 @@ let request = prepare_slipoff_request username line in
         true
         end
       else
+        begin
+        ignore (Printf.printf "Slipoff rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         true
+        end
 
 let rec superuser_until_succ username line server_ip port =
   let request = prepare_superuser_request username line in
@@ -223,9 +241,12 @@ let rec superuser_until_succ username line server_ip port =
         true
         end
       else
+        begin
+        ignore (Printf.printf "Superuser rejected, because \"%s\"\n\n%!" (char_list_to_string response.text));
         if yes_or_no "Do you want to try again?(Y/n): " then
           superuser_until_succ username line server_ip port
         else false
+        end
 
 let () =
   let argc = Array.length Sys.argv in
